@@ -7,19 +7,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect("mongodb://127.0.0.1:27017/hrms");
+// MongoDB Connection
+mongoose.connect("mongodb://127.0.0.1:27017/hrms")
+  .then(() => {
+    console.log("MongoDB Connected");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
+// Schema
 const employeeSchema = new mongoose.Schema({
   name: String,
   department: String,
   status: String,
 });
 
+// Model
 const Employee = mongoose.model(
   "Employee",
   employeeSchema
 );
 
+// GET Employees
 app.get("/employees", async (req, res) => {
 
   const employees =
@@ -29,6 +39,7 @@ app.get("/employees", async (req, res) => {
 
 });
 
+// ADD Employee
 app.post("/employees", async (req, res) => {
 
   const employee =
@@ -40,6 +51,21 @@ app.post("/employees", async (req, res) => {
 
 });
 
+// UPDATE Employee
+app.put("/employees/:id", async (req, res) => {
+
+  const updatedEmployee =
+    await Employee.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+  res.json(updatedEmployee);
+
+});
+
+// DELETE Employee
 app.delete("/employees/:id", async (req, res) => {
 
   await Employee.findByIdAndDelete(
@@ -52,6 +78,7 @@ app.delete("/employees/:id", async (req, res) => {
 
 });
 
+// SERVER
 app.listen(5000, () => {
 
   console.log(

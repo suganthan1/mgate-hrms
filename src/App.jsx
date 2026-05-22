@@ -3,19 +3,29 @@ import axios from "axios";
 
 export default function HRMSApp() {
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  const [showModal, setShowModal] = useState(false);
+  const [password, setPassword] =
+    useState("");
 
-  const [employeeName, setEmployeeName] = useState("");
-  const [department, setDepartment] = useState("");
+  const [showModal, setShowModal] =
+    useState(false);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [employeeName, setEmployeeName] =
+    useState("");
 
-  const [employees, setEmployees] = useState([]);
+  const [department, setDepartment] =
+    useState("");
+
+  const [searchTerm, setSearchTerm] =
+    useState("");
+
+  const [employees, setEmployees] =
+    useState([]);
 
   const [editingEmployee, setEditingEmployee] =
     useState(null);
@@ -35,7 +45,7 @@ export default function HRMSApp() {
     },
   ];
 
-  // FETCH EMPLOYEES
+  // Fetch Employees
   useEffect(() => {
 
     fetchEmployees();
@@ -100,7 +110,9 @@ export default function HRMSApp() {
 
                 } else {
 
-                  alert("Invalid Email or Password");
+                  alert(
+                    "Invalid Email or Password"
+                  );
 
                 }
 
@@ -128,6 +140,7 @@ export default function HRMSApp() {
 
   }
 
+  // DASHBOARD
   return (
 
     <div className="min-h-screen bg-slate-100 flex">
@@ -145,19 +158,19 @@ export default function HRMSApp() {
             Dashboard
           </li>
 
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl">
+          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
             Employees
           </li>
 
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl">
+          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
             Attendance
           </li>
 
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl">
+          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
             Leave
           </li>
 
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl">
+          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
             Payroll
           </li>
 
@@ -204,7 +217,9 @@ export default function HRMSApp() {
               </button>
 
               <button
-                onClick={() => setIsLoggedIn(false)}
+                onClick={() =>
+                  setIsLoggedIn(false)
+                }
                 className="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-2xl shadow-lg"
               >
                 Logout
@@ -214,7 +229,7 @@ export default function HRMSApp() {
 
           </div>
 
-          {/* Cards */}
+          {/* Dashboard Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
             <div className="bg-white rounded-2xl shadow p-6">
@@ -255,10 +270,10 @@ export default function HRMSApp() {
 
           </div>
 
-          {/* Tables */}
+          {/* Employee + Leave */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            {/* Employees */}
+            {/* Employee Table */}
             <div className="bg-white rounded-2xl shadow p-6">
 
               <div className="flex items-center justify-between mb-5">
@@ -332,13 +347,40 @@ export default function HRMSApp() {
 
                         <td>
 
-                          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm ${
+                              emp.status === "Present"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
                             {emp.status}
                           </span>
 
                         </td>
 
-                        <td className="py-3">
+                        <td className="py-3 flex gap-2">
+
+                          <button
+                            onClick={() => {
+
+                              setEditingEmployee(emp);
+
+                              setEmployeeName(
+                                emp.name
+                              );
+
+                              setDepartment(
+                                emp.department
+                              );
+
+                              setShowModal(true);
+
+                            }}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl"
+                          >
+                            Edit
+                          </button>
 
                           <button
                             onClick={async () => {
@@ -367,7 +409,7 @@ export default function HRMSApp() {
 
             </div>
 
-            {/* Leave */}
+            {/* Leave Requests */}
             <div className="bg-white rounded-2xl shadow p-6">
 
               <div className="flex items-center justify-between mb-5">
@@ -405,7 +447,13 @@ export default function HRMSApp() {
 
                       </div>
 
-                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          leave.status === "Approved"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
                         {leave.status}
                       </span>
 
@@ -439,11 +487,17 @@ export default function HRMSApp() {
             <div className="flex items-center justify-between mb-6">
 
               <h2 className="text-2xl font-bold">
-                Add Employee
+
+                {editingEmployee
+                  ? "Edit Employee"
+                  : "Add Employee"}
+
               </h2>
 
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() =>
+                  setShowModal(false)
+                }
                 className="text-gray-500 text-2xl"
               >
                 ×
@@ -458,7 +512,9 @@ export default function HRMSApp() {
                 placeholder="Employee Name"
                 value={employeeName}
                 onChange={(e) =>
-                  setEmployeeName(e.target.value)
+                  setEmployeeName(
+                    e.target.value
+                  )
                 }
                 className="w-full border rounded-xl px-4 py-3"
               />
@@ -468,7 +524,9 @@ export default function HRMSApp() {
                 placeholder="Department"
                 value={department}
                 onChange={(e) =>
-                  setDepartment(e.target.value)
+                  setDepartment(
+                    e.target.value
+                  )
                 }
                 className="w-full border rounded-xl px-4 py-3"
               />
@@ -476,14 +534,29 @@ export default function HRMSApp() {
               <button
                 onClick={async () => {
 
-                  await axios.post(
-                    "http://localhost:5000/employees",
-                    {
-                      name: employeeName,
-                      department: department,
-                      status: "Present",
-                    }
-                  );
+                  if (editingEmployee) {
+
+                    await axios.put(
+                      `http://localhost:5000/employees/${editingEmployee._id}`,
+                      {
+                        name: employeeName,
+                        department: department,
+                        status: "Present",
+                      }
+                    );
+
+                  } else {
+
+                    await axios.post(
+                      "http://localhost:5000/employees",
+                      {
+                        name: employeeName,
+                        department: department,
+                        status: "Present",
+                      }
+                    );
+
+                  }
 
                   fetchEmployees();
 
@@ -492,10 +565,14 @@ export default function HRMSApp() {
                   setEmployeeName("");
                   setDepartment("");
 
+                  setEditingEmployee(null);
+
                 }}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
               >
-                Save Employee
+                {editingEmployee
+                  ? "Update Employee"
+                  : "Save Employee"}
               </button>
 
             </div>
