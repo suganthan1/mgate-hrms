@@ -30,6 +30,9 @@ export default function HRMSApp() {
   const [editingEmployee, setEditingEmployee] =
     useState(null);
 
+  const [selectedEmployee, setSelectedEmployee] =
+    useState(null);
+
   const leaves = [
     {
       employee: "Priya",
@@ -251,7 +254,11 @@ export default function HRMSApp() {
               </h2>
 
               <p className="text-4xl font-bold mt-3">
-                110
+                {
+                  employees.filter(
+                    (emp) => emp.status === "Present"
+                  ).length
+                }
               </p>
 
             </div>
@@ -263,7 +270,11 @@ export default function HRMSApp() {
               </h2>
 
               <p className="text-4xl font-bold mt-3">
-                5
+                {
+                  employees.filter(
+                    (emp) => emp.status === "Leave"
+                  ).length
+                }
               </p>
 
             </div>
@@ -338,7 +349,16 @@ export default function HRMSApp() {
                       >
 
                         <td className="py-4">
-                          {emp.name}
+
+                          <button
+                            onClick={() =>
+                              setSelectedEmployee(emp)
+                            }
+                            className="text-blue-600 hover:underline font-semibold"
+                          >
+                            {emp.name}
+                          </button>
+
                         </td>
 
                         <td>
@@ -347,15 +367,37 @@ export default function HRMSApp() {
 
                         <td>
 
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm ${
+                          <select
+                            value={emp.status}
+                            onChange={async (e) => {
+
+                              await axios.put(
+                                `http://localhost:5000/employees/${emp._id}`,
+                                {
+                                  ...emp,
+                                  status: e.target.value,
+                                }
+                              );
+
+                              fetchEmployees();
+
+                            }}
+                            className={`px-3 py-1 rounded-full text-sm border ${
                               emp.status === "Present"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-700"
                             }`}
                           >
-                            {emp.status}
-                          </span>
+
+                            <option value="Present">
+                              Present
+                            </option>
+
+                            <option value="Leave">
+                              Leave
+                            </option>
+
+                          </select>
 
                         </td>
 
@@ -477,7 +519,7 @@ export default function HRMSApp() {
 
       </div>
 
-      {/* Modal */}
+      {/* Add/Edit Modal */}
       {showModal && (
 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -574,6 +616,80 @@ export default function HRMSApp() {
                   ? "Update Employee"
                   : "Save Employee"}
               </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
+      {/* Employee Profile Popup */}
+      {selectedEmployee && (
+
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl">
+
+            <div className="flex items-center justify-between mb-6">
+
+              <h2 className="text-2xl font-bold">
+                Employee Profile
+              </h2>
+
+              <button
+                onClick={() =>
+                  setSelectedEmployee(null)
+                }
+                className="text-2xl text-gray-500"
+              >
+                ×
+              </button>
+
+            </div>
+
+            <div className="space-y-4">
+
+              <div>
+                <p className="text-gray-500">
+                  Employee Name
+                </p>
+
+                <h3 className="text-xl font-bold">
+                  {selectedEmployee.name}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-gray-500">
+                  Department
+                </p>
+
+                <h3 className="text-xl font-bold">
+                  {selectedEmployee.department}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-gray-500">
+                  Status
+                </p>
+
+                <h3 className="text-xl font-bold">
+                  {selectedEmployee.status}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-gray-500">
+                  Employee ID
+                </p>
+
+                <h3 className="text-xl font-bold break-all">
+                  {selectedEmployee._id}
+                </h3>
+              </div>
 
             </div>
 
