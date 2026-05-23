@@ -20,6 +20,10 @@ mongoose.connect("mongodb://127.0.0.1:27017/hrms")
 const employeeSchema = new mongoose.Schema({
   name: String,
   department: String,
+  email: String,
+  phone: String,
+  role: String,
+  joiningDate: String,
   status: String,
 });
 
