@@ -675,26 +675,33 @@ export default function HRMSApp() {
 
       <thead>
 
-        <tr className="border-b">
+       <tr className="border-b">
 
-          <th className="text-left py-4">
-            Name
-          </th>
+  <th className="text-left py-4">
+    Employee
+  </th>
 
-          <th className="text-left py-4">
-            Department
-          </th>
+  <th className="text-left py-4">
+    Department
+  </th>
 
-          <th className="text-left py-4">
-            Status
-          </th>
+  <th className="text-left py-4">
+    Status
+  </th>
 
-          <th className="text-left py-4">
-            Action
-          </th>
+  <th className="text-left py-4">
+    Salary
+  </th>
 
-        </tr>
+  <th className="text-left py-4">
+    Payroll Status
+  </th>
 
+  <th className="text-left py-4">
+    Action
+  </th>
+
+</tr>
       </thead>
 
       <tbody>
@@ -1011,68 +1018,140 @@ export default function HRMSApp() {
 )}
 {/* PAYROLL PAGE */}
 {activePage === "payroll" &&
-  userRole === "Admin" && (
+ userRole === "Admin" && (
 
-  <div className="bg-white rounded-3xl shadow-xl p-8">
+  <div className="space-y-8">
 
-    <h2 className="text-4xl font-bold mb-8">
-      Payroll Management
-    </h2>
+    {/* HEADER */}
+    <div className="bg-white rounded-3xl shadow-xl p-8 flex justify-between items-center">
 
-    <table className="w-full">
+      <div>
 
-      <thead>
+        <h2 className="text-4xl font-bold">
+          Payroll Management
+        </h2>
 
-        <tr className="border-b">
+        <p className="text-gray-500 mt-2">
+          Manage employee salaries and payroll
+        </p>
 
-          <th className="text-left py-4">
-            Employee
-          </th>
+      </div>
 
-          <th className="text-left py-4">
-            Department
-          </th>
+      <button
+        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl"
+      >
+        Generate Payroll
+      </button>
 
-          <th className="text-left py-4">
-            Salary
-          </th>
+    </div>
 
-        </tr>
+    {/* PAYROLL TABLE */}
+    <div className="bg-white rounded-3xl shadow-xl p-8">
 
-      </thead>
+      <table className="w-full">
 
-      <tbody>
+        <thead>
 
-        {employees.map((employee) => (
+          <tr className="border-b">
 
-          <tr
-            key={employee._id}
-            className="border-b hover:bg-gray-50"
-          >
+            <th className="text-left py-4">
+              Employee
+            </th>
 
-            <td className="py-5">
-              {employee.name}
-            </td>
+            <th className="text-left py-4">
+              Department
+            </th>
 
-            <td className="py-5">
-              {employee.department}
-            </td>
+            <th className="text-left py-4">
+              Status
+            </th>
 
-            <td className="py-5 font-semibold text-green-600">
-              ₹25,000
-            </td>
+            <th className="text-left py-4">
+              Salary
+            </th>
+
+            <th className="text-left py-4">
+              Payroll Status
+            </th>
 
           </tr>
 
-        ))}
+        </thead>
 
-      </tbody>
+        <tbody>
 
-    </table>
+          {employees.map((employee) => (
+
+            <tr
+              key={employee._id}
+              className="border-b hover:bg-gray-50"
+            >
+
+              <td className="py-5 font-semibold">
+                {employee.name}
+              </td>
+
+              <td className="py-5">
+                {employee.department}
+              </td>
+
+              <td className="py-5">
+
+                <span
+                  className={`px-4 py-2 rounded-full text-sm ${
+                    employee.status === "Present"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {employee.status}
+                </span>
+
+              </td>
+
+              <td className="py-5 font-bold text-green-600">
+                ₹{employee.salary || 25000}
+              </td>
+
+              <td className="py-5">
+
+                <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm">
+                  Pending
+                </span>
+
+              </td>
+              <td className="py-5 flex gap-3">
+
+  <button
+    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm"
+  >
+    Pay
+  </button>
+
+  <button
+    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm"
+  >
+    Payslip
+  </button>
+  
+
+</td>
+
+
+            </tr>
+
+          ))}
+
+        </tbody>
+
+      </table>
+
+      </div>
 
   </div>
 
 )}
+
       </div>
     </div>
   );
