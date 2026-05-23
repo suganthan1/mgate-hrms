@@ -3,6 +3,13 @@ import logo from "./assets/logo.png";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function HRMSApp() {
 
@@ -19,14 +26,28 @@ export default function HRMSApp() {
 
   // EMPLOYEE
   const [employees, setEmployees] = useState([]);
+  const [departments, setDepartments] = useState([
+  "IT",
+  "HR",
+  "Management",
+]);
+
+const [departmentName, setDepartmentName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   const [showModal, setShowModal] = useState(false);
 
   const [employeeName, setEmployeeName] = useState("");
   const [department, setDepartment] = useState("");
+  const [employeeEmail, setEmployeeEmail] = useState("");
+  const [employeePhone, setEmployeePhone] = useState("");
+  const [employeeRole, setEmployeeRole] = useState("");
+  const [joiningDate, setJoiningDate] = useState("");
+  const [salary, setSalary] = useState("");
 
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  
 
   // LEAVE
   const [leaves, setLeaves] = useState([
@@ -38,6 +59,20 @@ export default function HRMSApp() {
     },
   ]);
   const [payrollStatus, setPayrollStatus] = useState({});
+  const chartData = [
+  {
+    name: "Present",
+    value: employees.filter(
+      (emp) => emp.status === "Present"
+    ).length,
+  },
+  {
+    name: "Leave",
+    value: employees.filter(
+      (emp) => emp.status === "Leave"
+    ).length,
+  },
+];
 
   const [showLeaveModal, setShowLeaveModal] = useState(false);
 
@@ -66,44 +101,118 @@ export default function HRMSApp() {
   }, []);
 
   // ADD EMPLOYEE
-  const addEmployee = async () => {
+const addEmployee = async () => {
 
-    if (
-      employeeName.trim() === "" ||
-      department.trim() === ""
-    ) {
+  if (
+    employeeName.trim() === "" ||
+    department.trim() === ""
+  ) {
 
-      alert("Please fill all fields");
+    alert("Please fill all fields");
 
-      return;
+    return;
 
-    }
+  }
 
-    try {
+  try {
 
-      await axios.post(
-        "http://localhost:5000/employees",
-        {
-          name: employeeName,
-          department: department,
-          status: "Present",
-        }
-      );
+    await axios.post(
+      "http://localhost:5000/employees",
+      {
+        name: employeeName,
+        department: department,
+        email: employeeEmail,
+        phone: employeePhone,
+        role: employeeRole,
+        joiningDate: joiningDate,
+        salary: salary,
+        status: "Present",
+      }
+    );
 
-      fetchEmployees();
+    setEmployeeName("");
+    setDepartment("");
+    setEmployeeEmail("");
+    setEmployeePhone("");
+    setEmployeeRole("");
+    setJoiningDate("");
+    setSalary("");
 
-      setEmployeeName("");
-      setDepartment("");
+    fetchEmployees();
 
-      setShowModal(false);
+    setShowModal(false);
 
-    } catch (error) {
+  } catch (error) {
 
-      console.log(error);
+    console.log(error);
 
-    }
-  };
+  }
 
+};
+const addDepartment = () => {
+
+  if (
+    departmentName.trim() === ""
+  ) {
+
+    alert(
+      "Enter department name"
+    );
+
+    return;
+
+  }
+
+  setDepartments([
+    ...departments,
+    departmentName,
+  ]);
+
+  setDepartmentName("");
+
+};
+
+
+const deleteDepartment = (index) => {
+
+  const updatedDepartments =
+    [...departments];
+
+  updatedDepartments.splice(index, 1);
+
+  setDepartments(updatedDepartments);
+
+};
+
+
+// CHECK IN
+const handleCheckIn = () => {
+
+  const currentTime =
+    new Date().toLocaleTimeString();
+
+  setCheckInTime(currentTime);
+
+  alert(
+    `Checked In at ${currentTime}`
+  );
+
+};
+
+
+// CHECK OUT
+const handleCheckOut = () => {
+
+  const currentTime =
+    new Date().toLocaleTimeString();
+
+  setCheckOutTime(currentTime);
+
+  alert(
+    `Checked Out at ${currentTime}`
+  );
+
+};
   // DELETE EMPLOYEE
   const deleteEmployee = async (id) => {
 
@@ -447,7 +556,11 @@ export default function HRMSApp() {
             onClick={() =>
               setActivePage("dashboard")
             }
-            className="cursor-pointer"
+            className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+  activePage === "dashboard"
+    ? "bg-blue-600 text-white"
+    : "hover:bg-gray-200"
+}`}
           >
             Dashboard
           </li>
@@ -457,9 +570,27 @@ export default function HRMSApp() {
               onClick={() =>
                 setActivePage("employees")
               }
-              className="cursor-pointer"
+              className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+  activePage === "dashboard"
+    ? "bg-blue-600 text-white"
+    : "hover:bg-gray-200"
+}`}
             >
               Employees
+              {userRole === "Admin" && (
+  <li
+    onClick={() =>
+      setActivePage("departments")
+    }
+    className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+  activePage === "employees"
+    ? "bg-blue-600 text-white"
+    : "hover:bg-gray-200"
+}`}
+  >
+    Departments
+  </li>
+)}
             </li>
           )}
 
@@ -467,7 +598,11 @@ export default function HRMSApp() {
             onClick={() =>
               setActivePage("attendance")
             }
-            className="cursor-pointer"
+            className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+  activePage === "departments"
+    ? "bg-blue-600 text-white"
+    : "hover:bg-gray-200"
+}`}
           >
             Attendance
           </li>
@@ -476,7 +611,11 @@ export default function HRMSApp() {
             onClick={() =>
               setActivePage("leave")
             }
-            className="cursor-pointer"
+           className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+  activePage === "attendance"
+    ? "bg-blue-600 text-white"
+    : "hover:bg-gray-200"
+}`}
           >
             Leave
           </li>
@@ -486,7 +625,11 @@ export default function HRMSApp() {
               onClick={() =>
                 setActivePage("payroll")
               }
-              className="cursor-pointer"
+              className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+  activePage === "leave"
+    ? "bg-blue-600 text-white"
+    : "hover:bg-gray-200"
+}`}
             >
               Payroll
             </li>
@@ -636,6 +779,7 @@ export default function HRMSApp() {
       </div>
 
     </div>
+    
 
     {/* WELCOME */}
     <div className="bg-white rounded-3xl shadow-xl p-10">
@@ -656,11 +800,46 @@ export default function HRMSApp() {
   </div>
 
 )}
-        {/* EMPLOYEES PAGE */}
+
+{/* ANALYTICS */}
+<div className="bg-white rounded-3xl shadow-xl p-8 mt-10">
+
+  <h2 className="text-3xl font-bold mb-8">
+    Employee Analytics
+  </h2>
+
+  <div className="h-80">
+
+    <ResponsiveContainer width="100%" height="100%">
+
+      <PieChart>
+
+        <Pie
+          data={chartData}
+          dataKey="value"
+          outerRadius={120}
+          label
+        >
+
+          <Cell fill="#22c55e" />
+          <Cell fill="#facc15" />
+
+        </Pie>
+
+        <Tooltip />
+
+      </PieChart>
+
+    </ResponsiveContainer>
+
+  </div>
+
+</div>
+       {/* EMPLOYEES PAGE */}
 {activePage === "employees" &&
   userRole === "Admin" && (
 
-  <div className="bg-white rounded-3xl shadow-xl p-8">
+  <div className="bg-white rounded-3xl shadow-xl p-8 mt-8">
 
     <div className="flex justify-between items-center mb-8">
 
@@ -682,36 +861,29 @@ export default function HRMSApp() {
 
     <table className="w-full">
 
-      <thead>
+     <thead>
 
-       <tr className="border-b">
+  <tr className="border-b">
 
-  <th className="text-left py-4">
-    Employee
-  </th>
+    <th className="text-left py-4">
+      Name
+    </th>
 
-  <th className="text-left py-4">
-    Department
-  </th>
+    <th className="text-left py-4">
+      Department
+    </th>
 
-  <th className="text-left py-4">
-    Status
-  </th>
+    <th className="text-left py-4">
+      Status
+    </th>
 
-  <th className="text-left py-4">
-    Salary
-  </th>
+    <th className="text-left py-4">
+      Action
+    </th>
 
-  <th className="text-left py-4">
-    Payroll Status
-  </th>
+  </tr>
 
-  <th className="text-left py-4">
-    Action
-  </th>
-
-</tr>
-      </thead>
+</thead>
 
       <tbody>
 
@@ -786,63 +958,129 @@ export default function HRMSApp() {
 )}
 {/* ATTENDANCE PAGE */}
 {activePage === "attendance" && (
-  <div className="bg-white rounded-3xl shadow-xl p-8">
-    <div className="flex justify-between items-center mb-8">
-      <div>
-        <h2 className="text-4xl font-bold">Attendance</h2>
-        <p className="text-gray-500 mt-2">
-          Mark employee attendance and switch status between Present and Leave.
-        </p>
+
+  <div className="space-y-8">
+
+    {/* HEADER */}
+
+    <div className="bg-white rounded-3xl shadow-xl p-8">
+
+      <div className="flex justify-between items-center">
+
+        <div>
+
+          <h2 className="text-4xl font-bold">
+            Attendance
+          </h2>
+
+          <p className="text-gray-500 mt-2">
+            Mark employee attendance and manage check-in/check-out.
+          </p>
+
+        </div>
+
       </div>
+
     </div>
 
-    <table className="w-full">
-      <thead>
-        <tr className="border-b">
-          <th className="text-left py-4">Employee</th>
-          <th className="text-left py-4">Department</th>
-          <th className="text-left py-4">Status</th>
-          <th className="text-left py-4">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {employees.map((employee) => (
-          <tr
-            key={employee._id}
-            className="border-b hover:bg-gray-50"
-          >
-            <td className="py-5 font-semibold text-blue-600">
-              {employee.name}
-            </td>
-            <td className="py-5">
-              {employee.department}
-            </td>
-            <td className="py-5">
-              <span
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  employee.status === "Present"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {employee.status}
-              </span>
-            </td>
-            <td className="py-5">
-              <button
-                onClick={() => toggleStatus(employee)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl"
-              >
-                {employee.status === "Present"
-                  ? "Mark Leave"
-                  : "Mark Present"}
-              </button>
-            </td>
+    
+    {/* ATTENDANCE TABLE */}
+
+    <div className="bg-white rounded-3xl shadow-xl p-8">
+
+      <table className="w-full">
+
+        <thead>
+
+          <tr className="border-b">
+
+            <th className="text-left py-4">
+              Employee
+            </th>
+
+            <th className="text-left py-4">
+              Department
+            </th>
+
+            <th className="text-left py-4">
+              Status
+            </th>
+
+            <th className="text-left py-4">
+              Action
+            </th>
+
           </tr>
-        ))}
-      </tbody>
-    </table>
+
+        </thead>
+
+        <tbody>
+
+          {employees.map((employee) => (
+
+            <tr
+              key={employee._id}
+              className="border-b hover:bg-gray-50"
+            >
+
+              <td className="py-5">
+
+                <button
+                  onClick={() =>
+                    setSelectedEmployee(employee)
+                  }
+                  className="font-semibold text-blue-600 hover:underline"
+                >
+                  {employee.name}
+                </button>
+
+              </td>
+
+              <td className="py-5">
+                {employee.department}
+              </td>
+
+              <td className="py-5">
+
+                <span
+                  className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                    employee.status === "Present"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {employee.status}
+                </span>
+
+              </td>
+
+              <td className="py-5">
+
+                <button
+                  onClick={() =>
+                    toggleStatus(employee)
+                  }
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl"
+                >
+                  {employee.status === "Present"
+                    ? "Mark Leave"
+                    : "Mark Present"}
+                </button>
+
+              </td>
+
+            </tr>
+
+          ))}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
   </div>
+
 )}
 {/* ADD EMPLOYEE MODAL */}
 {showModal && (
@@ -904,6 +1142,95 @@ export default function HRMSApp() {
             : "Save Employee"}
 
         </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
+{/* EMPLOYEE PROFILE MODAL */}
+{selectedEmployee && (
+
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+
+    <div className="bg-white rounded-3xl p-8 w-full max-w-lg">
+
+      <div className="flex justify-between items-center mb-8">
+
+        <h2 className="text-3xl font-bold">
+          Employee Profile
+        </h2>
+
+        <button
+          onClick={() =>
+            setSelectedEmployee(null)
+          }
+          className="text-3xl text-gray-500"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div className="space-y-5 text-lg">
+
+        <div>
+          <span className="font-bold">
+            Name:
+          </span>{" "}
+          {selectedEmployee.name}
+        </div>
+
+        <div>
+          <span className="font-bold">
+            Department:
+          </span>{" "}
+          {selectedEmployee.department}
+        </div>
+
+        <div>
+          <span className="font-bold">
+            Email:
+          </span>{" "}
+          {selectedEmployee.email || "N/A"}
+        </div>
+
+        <div>
+          <span className="font-bold">
+            Phone:
+          </span>{" "}
+          {selectedEmployee.phone || "N/A"}
+        </div>
+
+        <div>
+          <span className="font-bold">
+            Role:
+          </span>{" "}
+          {selectedEmployee.role || "N/A"}
+        </div>
+
+        <div>
+          <span className="font-bold">
+            Joining Date:
+          </span>{" "}
+          {selectedEmployee.joiningDate || "N/A"}
+        </div>
+
+        <div>
+          <span className="font-bold">
+            Salary:
+          </span>{" "}
+          ₹{selectedEmployee.salary || 25000}
+        </div>
+
+        <div>
+          <span className="font-bold">
+            Status:
+          </span>{" "}
+          {selectedEmployee.status}
+        </div>
 
       </div>
 
