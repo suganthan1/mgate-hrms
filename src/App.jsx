@@ -1,515 +1,408 @@
 import { useState, useEffect } from "react";
+import logo from "./assets/logo.png";
 import axios from "axios";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export default function HRMSApp() {
 
-  const [isLoggedIn, setIsLoggedIn] =
-    useState(false);
+  // LOGIN
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState("");
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [password, setPassword] =
-    useState("");
+  // UI
+  const [activePage, setActivePage] = useState("dashboard");
+  const [darkMode, setDarkMode] = useState(false);
 
-  const [showModal, setShowModal] =
-    useState(false);
+  // EMPLOYEE
+  const [employees, setEmployees] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [employeeName, setEmployeeName] =
-    useState("");
+  const [showModal, setShowModal] = useState(false);
 
-  const [department, setDepartment] =
-    useState("");
+  const [employeeName, setEmployeeName] = useState("");
+  const [department, setDepartment] = useState("");
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+  const [editingEmployee, setEditingEmployee] = useState(null);
 
-  const [employees, setEmployees] =
-    useState([]);
-
-  const [editingEmployee, setEditingEmployee] =
-    useState(null);
-
-  const [selectedEmployee, setSelectedEmployee] =
-    useState(null);
-
-  const leaves = [
+  // LEAVE
+  const [leaves, setLeaves] = useState([
     {
       employee: "Priya",
       type: "Sick Leave",
       days: 2,
-      status: "Approved",
-    },
-    {
-      employee: "Arun Kumar",
-      type: "Casual Leave",
-      days: 1,
       status: "Pending",
     },
-  ];
+  ]);
 
-  // Fetch Employees
-  useEffect(() => {
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
 
-    fetchEmployees();
+  const [leaveEmployee, setLeaveEmployee] = useState("");
+  const [leaveType, setLeaveType] = useState("");
+  const [leaveDays, setLeaveDays] = useState("");
 
-  }, []);
-
+  // FETCH EMPLOYEES
   const fetchEmployees = async () => {
-
-    const response =
-      await axios.get(
+    try {
+      const response = await axios.get(
         "http://localhost:5000/employees"
       );
 
-    setEmployees(response.data);
+      setEmployees(response.data);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  // ADD EMPLOYEE
+  const addEmployee = async () => {
+
+    if (
+      employeeName.trim() === "" ||
+      department.trim() === ""
+    ) {
+
+      alert("Please fill all fields");
+
+      return;
+
+    }
+
+    try {
+
+      await axios.post(
+        "http://localhost:5000/employees",
+        {
+          name: employeeName,
+          department: department,
+          status: "Present",
+        }
+      );
+
+      fetchEmployees();
+
+      setEmployeeName("");
+      setDepartment("");
+
+      setShowModal(false);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // DELETE EMPLOYEE
+  const deleteEmployee = async (id) => {
+
+    try {
+
+      await axios.delete(
+        `http://localhost:5000/employees/${id}`
+      );
+
+      fetchEmployees();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // EDIT EMPLOYEE
+  const editEmployee = (employee) => {
+
+    setEditingEmployee(employee);
+
+    setEmployeeName(employee.name);
+
+    setDepartment(employee.department);
+
+    setShowModal(true);
 
   };
 
+  // UPDATE EMPLOYEE
+  const updateEmployee = async () => {
+
+    try {
+
+      await axios.put(
+        `http://localhost:5000/employees/${editingEmployee._id}`,
+        {
+          name: employeeName,
+          department: department,
+        }
+      );
+
+      fetchEmployees();
+
+      setShowModal(false);
+
+      setEditingEmployee(null);
+
+      setEmployeeName("");
+      setDepartment("");
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // ATTENDANCE
+  const toggleStatus = async (employee) => {
+
+    try {
+
+      const newStatus =
+        employee.status === "Present"
+          ? "Leave"
+          : "Present";
+
+      await axios.put(
+        `http://localhost:5000/employees/${employee._id}`,
+        {
+          ...employee,
+          status: newStatus,
+        }
+      );
+
+      fetchEmployees();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // ADD LEAVE
+  const addLeaveRequest = () => {
+
+    if (
+      leaveEmployee.trim() === "" ||
+      leaveType.trim() === "" ||
+      leaveDays.trim() === ""
+    ) {
+
+      alert("Please fill all fields");
+
+      return;
+
+    }
+
+    const newLeave = {
+      employee: leaveEmployee,
+      type: leaveType,
+      days: leaveDays,
+      status: "Pending",
+    };
+
+    setLeaves([...leaves, newLeave]);
+
+    setLeaveEmployee("");
+    setLeaveType("");
+    setLeaveDays("");
+
+    setShowLeaveModal(false);
+
+  };
+
+  // UPDATE LEAVE STATUS
+  const updateLeaveStatus = (
+    index,
+    newStatus
+  ) => {
+
+    const updatedLeaves = [...leaves];
+
+    updatedLeaves[index].status = newStatus;
+
+    setLeaves(updatedLeaves);
+
+  };
+
+   const exportToExcel = () => {
+
+  const worksheet =
+    XLSX.utils.json_to_sheet(employees);
+
+  const workbook =
+    XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "Employees"
+  );
+
+  const excelBuffer =
+    XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+  const data = new Blob(
+    [excelBuffer],
+    {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    }
+  );
+
+  saveAs(
+    data,
+    "employees.xlsx"
+  );
+
+};
+
   // LOGIN PAGE
   if (!isLoggedIn) {
+   
 
     return (
 
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
 
-        <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-6xl grid grid-cols-1 md:grid-cols-2">
 
-          <h1 className="text-4xl font-extrabold text-blue-700 text-center mb-8">
-            MGate HRMS
-          </h1>
+          {/* LEFT */}
+          <div className="p-10 flex flex-col justify-center">
 
-          <div className="space-y-5">
+            <div className="flex flex-col items-center mb-10">
 
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              className="w-full border rounded-xl px-4 py-3"
-            />
+              <img
+                src={logo}
+                alt="logo"
+                className="w-52 mb-4"
+              />
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              className="w-full border rounded-xl px-4 py-3"
-            />
-
-            <button
-              onClick={() => {
-
-                if (
-                  email === "admin@mgatetech.com" &&
-                  password === "admin123"
-                ) {
-
-                  setIsLoggedIn(true);
-
-                } else {
-
-                  alert(
-                    "Invalid Email or Password"
-                  );
-
-                }
-
-              }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
-            >
-              Login
-            </button>
-
-          </div>
-
-          <p className="text-center text-gray-500 mt-6">
-            Demo Login:
-            <br />
-            admin@mgatetech.com
-            <br />
-            admin123
-          </p>
-
-        </div>
-
-      </div>
-
-    );
-
-  }
-
-  // DASHBOARD
-  return (
-
-    <div className="min-h-screen bg-slate-100 flex">
-
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-xl rounded-r-3xl p-6">
-
-        <h2 className="text-3xl font-extrabold text-blue-700 mb-10">
-          MGate
-        </h2>
-
-        <ul className="space-y-4">
-
-          <li className="bg-blue-600 text-white px-4 py-3 rounded-2xl font-semibold">
-            Dashboard
-          </li>
-
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
-            Employees
-          </li>
-
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
-            Attendance
-          </li>
-
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
-            Leave
-          </li>
-
-          <li className="hover:bg-gray-100 px-4 py-3 rounded-2xl cursor-pointer">
-            Payroll
-          </li>
-
-        </ul>
-
-      </div>
-
-      {/* Main */}
-      <div className="flex-1 p-6">
-
-        <div className="max-w-7xl mx-auto">
-
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-
-            <div>
-
-              <h1 className="text-5xl font-extrabold text-blue-700">
-                MGate HRMS
-              </h1>
-
-              <p className="text-gray-500 mt-2">
+              <p className="text-gray-500 text-lg">
                 Employee Management System
               </p>
 
             </div>
 
-            <div className="flex gap-3">
+            <div className="space-y-5">
+
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                className="w-full border rounded-xl px-5 py-4"
+              />
+
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                className="w-full border rounded-xl px-5 py-4"
+              />
 
               <button
                 onClick={() => {
 
-                  setEditingEmployee(null);
+                  if (
+                    email === "admin@mgatetech.com" &&
+                    password === "admin123"
+                  ) {
 
-                  setEmployeeName("");
-                  setDepartment("");
+                    setUserRole("Admin");
 
-                  setShowModal(true);
+                    setIsLoggedIn(true);
+
+                  }
+
+                  else if (
+                    email === "employee@mgatetech.com" &&
+                    password === "employee123"
+                  ) {
+
+                    setUserRole("Employee");
+
+                    setIsLoggedIn(true);
+
+                  }
+
+                  else {
+
+                    alert(
+                      "Invalid Email or Password"
+                    );
+
+                  }
 
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl shadow-lg"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl"
               >
-                Add Employee
+                Sign In
               </button>
 
-              <button
-                onClick={() =>
-                  setIsLoggedIn(false)
-                }
-                className="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-2xl shadow-lg"
-              >
-                Logout
-              </button>
+            </div>
+
+            <div className="mt-8">
+
+              <p className="mb-4 text-gray-500">
+                Demo Login
+              </p>
+
+              <div className="bg-gray-100 rounded-2xl p-4 mb-3">
+
+                <p className="font-semibold">
+                  admin@mgatetech.com
+                </p>
+
+                <p>admin123</p>
+
+              </div>
+
+              <div className="bg-gray-100 rounded-2xl p-4">
+
+                <p className="font-semibold">
+                  employee@mgatetech.com
+                </p>
+
+                <p>employee123</p>
+
+              </div>
 
             </div>
 
           </div>
 
-          {/* Dashboard Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* RIGHT */}
+          <div className="bg-blue-600 text-white flex items-center justify-center">
 
-            <div className="bg-white rounded-2xl shadow p-6">
+            <div className="text-center p-10">
 
-              <h2 className="text-lg font-semibold text-gray-600">
-                Total Employees
-              </h2>
-
-              <p className="text-4xl font-bold mt-3">
-                {employees.length}
-              </p>
-
-            </div>
-
-            <div className="bg-white rounded-2xl shadow p-6">
-
-              <h2 className="text-lg font-semibold text-gray-600">
-                Present Today
-              </h2>
-
-              <p className="text-4xl font-bold mt-3">
-                {
-                  employees.filter(
-                    (emp) => emp.status === "Present"
-                  ).length
-                }
-              </p>
-
-            </div>
-
-            <div className="bg-white rounded-2xl shadow p-6">
-
-              <h2 className="text-lg font-semibold text-gray-600">
-                Pending Leaves
-              </h2>
-
-              <p className="text-4xl font-bold mt-3">
-                {
-                  employees.filter(
-                    (emp) => emp.status === "Leave"
-                  ).length
-                }
-              </p>
-
-            </div>
-
-          </div>
-
-          {/* Employee + Leave */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* Employee Table */}
-            <div className="bg-white rounded-2xl shadow p-6">
-
-              <div className="flex items-center justify-between mb-5">
-
-                <h2 className="text-2xl font-bold">
-                  Employees
-                </h2>
-
-                <input
-                  type="text"
-                  placeholder="Search employee"
-                  value={searchTerm}
-                  onChange={(e) =>
-                    setSearchTerm(e.target.value)
-                  }
-                  className="border rounded-xl px-4 py-2"
-                />
-
+              <div className="text-7xl mb-6">
+                👨‍💼
               </div>
 
-              <table className="w-full">
-
-                <thead>
-
-                  <tr className="text-left border-b">
-
-                    <th className="pb-3">
-                      Name
-                    </th>
-
-                    <th className="pb-3">
-                      Department
-                    </th>
-
-                    <th className="pb-3">
-                      Status
-                    </th>
-
-                    <th className="pb-3">
-                      Action
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  {employees
-                    .filter((emp) =>
-                      emp.name
-                        .toLowerCase()
-                        .includes(
-                          searchTerm.toLowerCase()
-                        )
-                    )
-                    .map((emp) => (
-
-                      <tr
-                        key={emp._id}
-                        className="border-b"
-                      >
-
-                        <td className="py-4">
-
-                          <button
-                            onClick={() =>
-                              setSelectedEmployee(emp)
-                            }
-                            className="text-blue-600 hover:underline font-semibold"
-                          >
-                            {emp.name}
-                          </button>
-
-                        </td>
-
-                        <td>
-                          {emp.department}
-                        </td>
-
-                        <td>
-
-                          <select
-                            value={emp.status}
-                            onChange={async (e) => {
-
-                              await axios.put(
-                                `http://localhost:5000/employees/${emp._id}`,
-                                {
-                                  ...emp,
-                                  status: e.target.value,
-                                }
-                              );
-
-                              fetchEmployees();
-
-                            }}
-                            className={`px-3 py-1 rounded-full text-sm border ${
-                              emp.status === "Present"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
-                          >
-
-                            <option value="Present">
-                              Present
-                            </option>
-
-                            <option value="Leave">
-                              Leave
-                            </option>
-
-                          </select>
-
-                        </td>
-
-                        <td className="py-3 flex gap-2">
-
-                          <button
-                            onClick={() => {
-
-                              setEditingEmployee(emp);
-
-                              setEmployeeName(
-                                emp.name
-                              );
-
-                              setDepartment(
-                                emp.department
-                              );
-
-                              setShowModal(true);
-
-                            }}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl"
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            onClick={async () => {
-
-                              await axios.delete(
-                                `http://localhost:5000/employees/${emp._id}`
-                              );
-
-                              fetchEmployees();
-
-                            }}
-                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl"
-                          >
-                            Delete
-                          </button>
-
-                        </td>
-
-                      </tr>
-
-                    ))}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-            {/* Leave Requests */}
-            <div className="bg-white rounded-2xl shadow p-6">
-
-              <div className="flex items-center justify-between mb-5">
-
-                <h2 className="text-2xl font-bold">
-                  Leave Requests
-                </h2>
-
-                <button className="bg-slate-800 text-white px-4 py-2 rounded-xl">
-                  View All
-                </button>
-
-              </div>
-
-              <div className="space-y-4">
-
-                {leaves.map((leave, index) => (
-
-                  <div
-                    key={index}
-                    className="border rounded-2xl p-4"
-                  >
-
-                    <div className="flex items-center justify-between">
-
-                      <div>
-
-                        <h3 className="font-semibold text-lg">
-                          {leave.employee}
-                        </h3>
-
-                        <p className="text-gray-500">
-                          {leave.type}
-                        </p>
-
-                      </div>
-
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          leave.status === "Approved"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {leave.status}
-                      </span>
-
-                    </div>
-
-                    <p className="mt-3 text-gray-600">
-                      {leave.days} day(s)
-                    </p>
-
-                  </div>
-
-                ))}
-
-              </div>
+              <h2 className="text-4xl font-bold mb-4">
+                Welcome to MGate HRMS
+              </h2>
 
             </div>
 
@@ -518,189 +411,605 @@ export default function HRMSApp() {
         </div>
 
       </div>
+    );
+  }
 
-      {/* Add/Edit Modal */}
-      {showModal && (
+  // MAIN APP
+  return (
 
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className={`min-h-screen flex ${
+      darkMode
+        ? "bg-slate-900 text-white"
+        : "bg-slate-100"
+    }`}>
 
-          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl">
+      {/* SIDEBAR */}
+      <div className="w-64 bg-white shadow-xl p-6">
 
-            <div className="flex items-center justify-between mb-6">
+        <img
+          src={logo}
+          alt="logo"
+          className="w-40 mx-auto mb-10"
+        />
 
-              <h2 className="text-2xl font-bold">
+        <ul className="space-y-4">
 
-                {editingEmployee
-                  ? "Edit Employee"
-                  : "Add Employee"}
+          <li
+            onClick={() =>
+              setActivePage("dashboard")
+            }
+            className="cursor-pointer"
+          >
+            Dashboard
+          </li>
 
-              </h2>
+          {userRole === "Admin" && (
+            <li
+              onClick={() =>
+                setActivePage("employees")
+              }
+              className="cursor-pointer"
+            >
+              Employees
+            </li>
+          )}
 
-              <button
-                onClick={() =>
-                  setShowModal(false)
-                }
-                className="text-gray-500 text-2xl"
-              >
-                ×
-              </button>
+          <li
+            onClick={() =>
+              setActivePage("attendance")
+            }
+            className="cursor-pointer"
+          >
+            Attendance
+          </li>
 
-            </div>
+          <li
+            onClick={() =>
+              setActivePage("leave")
+            }
+            className="cursor-pointer"
+          >
+            Leave
+          </li>
 
-            <div className="space-y-4">
+          {userRole === "Admin" && (
+            <li
+              onClick={() =>
+                setActivePage("payroll")
+              }
+              className="cursor-pointer"
+            >
+              Payroll
+            </li>
+          )}
 
-              <input
-                type="text"
-                placeholder="Employee Name"
-                value={employeeName}
-                onChange={(e) =>
-                  setEmployeeName(
-                    e.target.value
-                  )
-                }
-                className="w-full border rounded-xl px-4 py-3"
-              />
+        </ul>
 
-              <input
-                type="text"
-                placeholder="Department"
-                value={department}
-                onChange={(e) =>
-                  setDepartment(
-                    e.target.value
-                  )
-                }
-                className="w-full border rounded-xl px-4 py-3"
-              />
+      </div>
 
-              <button
-                onClick={async () => {
+      {/* MAIN */}
+      <div className="flex-1 p-8">
 
-                  if (editingEmployee) {
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-8">
 
-                    await axios.put(
-                      `http://localhost:5000/employees/${editingEmployee._id}`,
-                      {
-                        name: employeeName,
-                        department: department,
-                        status: "Present",
-                      }
-                    );
+          <div>
 
-                  } else {
+            <h1 className="text-5xl font-bold text-blue-700">
+              MGate HRMS
+            </h1>
 
-                    await axios.post(
-                      "http://localhost:5000/employees",
-                      {
-                        name: employeeName,
-                        department: department,
-                        status: "Present",
-                      }
-                    );
-
-                  }
-
-                  fetchEmployees();
-
-                  setShowModal(false);
-
-                  setEmployeeName("");
-                  setDepartment("");
-
-                  setEditingEmployee(null);
-
-                }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
-              >
-                {editingEmployee
-                  ? "Update Employee"
-                  : "Save Employee"}
-              </button>
-
-            </div>
+            <p>
+              {userRole} Portal
+            </p>
 
           </div>
 
-        </div>
+         <div className="flex gap-3">
 
-      )}
+  {userRole === "Admin" && (
 
-      {/* Employee Profile Popup */}
-      {selectedEmployee && (
+    <>
+    
+      <button
+        onClick={exportToExcel}
+        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl"
+      >
+        Export Excel
+      </button>
 
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <button
+        onClick={() => {
+          setEditingEmployee(null);
+          setEmployeeName("");
+          setDepartment("");
+          setShowModal(true);
+        }}
+        className="bg-blue-600 text-white px-5 py-3 rounded-2xl"
+      >
+        Add Employee
+      </button>
 
-          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl">
+    </>
 
-            <div className="flex items-center justify-between mb-6">
+  )}
 
-              <h2 className="text-2xl font-bold">
-                Employee Profile
-              </h2>
+  <button
+    onClick={() =>
+      setDarkMode(!darkMode)
+    }
+    className="bg-slate-800 text-white px-5 py-3 rounded-2xl"
+  >
+    Dark
+  </button>
 
-              <button
-                onClick={() =>
-                  setSelectedEmployee(null)
-                }
-                className="text-2xl text-gray-500"
-              >
-                ×
-              </button>
+  <button
+    onClick={() =>
+      setIsLoggedIn(false)
+    }
+    className="bg-red-500 text-white px-5 py-3 rounded-2xl"
+  >
+    Logout
+  </button>
 
-            </div>
+</div>
+</div>
 
-            <div className="space-y-4">
+       {/* DASHBOARD */}
+{activePage === "dashboard" && (
 
-              <div>
-                <p className="text-gray-500">
-                  Employee Name
-                </p>
+  <div>
 
-                <h3 className="text-xl font-bold">
-                  {selectedEmployee.name}
-                </h3>
-              </div>
+    {/* TOP CARDS */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 
-              <div>
-                <p className="text-gray-500">
-                  Department
-                </p>
+      <div className="bg-white rounded-3xl shadow-xl p-6">
 
-                <h3 className="text-xl font-bold">
-                  {selectedEmployee.department}
-                </h3>
-              </div>
+        <h2 className="text-gray-500 text-lg">
+          Total Employees
+        </h2>
 
-              <div>
-                <p className="text-gray-500">
-                  Status
-                </p>
+        <p className="text-5xl font-bold mt-4 text-blue-600">
+          {employees.length}
+        </p>
 
-                <h3 className="text-xl font-bold">
-                  {selectedEmployee.status}
-                </h3>
-              </div>
+      </div>
 
-              <div>
-                <p className="text-gray-500">
-                  Employee ID
-                </p>
+      <div className="bg-white rounded-3xl shadow-xl p-6">
 
-                <h3 className="text-xl font-bold break-all">
-                  {selectedEmployee._id}
-                </h3>
-              </div>
+        <h2 className="text-gray-500 text-lg">
+          Present Employees
+        </h2>
 
-            </div>
+        <p className="text-5xl font-bold mt-4 text-green-600">
+          {
+            employees.filter(
+              (emp) =>
+                emp.status === "Present"
+            ).length
+          }
+        </p>
 
-          </div>
+      </div>
 
-        </div>
+      <div className="bg-white rounded-3xl shadow-xl p-6">
 
-      )}
+        <h2 className="text-gray-500 text-lg">
+          Employees On Leave
+        </h2>
+
+        <p className="text-5xl font-bold mt-4 text-yellow-500">
+          {
+            employees.filter(
+              (emp) =>
+                emp.status === "Leave"
+            ).length
+          }
+        </p>
+
+      </div>
+
+      <div className="bg-white rounded-3xl shadow-xl p-6">
+
+        <h2 className="text-gray-500 text-lg">
+          Pending Leaves
+        </h2>
+
+        <p className="text-5xl font-bold mt-4 text-red-500">
+          {
+            leaves.filter(
+              (leave) =>
+                leave.status === "Pending"
+            ).length
+          }
+        </p>
+
+      </div>
 
     </div>
 
-  );
+    {/* WELCOME */}
+    <div className="bg-white rounded-3xl shadow-xl p-10">
 
+      <h2 className="text-4xl font-bold mb-4">
+        Welcome to MGate HRMS
+      </h2>
+
+      <p className="text-gray-500 text-lg">
+        Manage employees, attendance,
+        leave requests, payroll and
+        company operations from one
+        centralized dashboard.
+      </p>
+
+    </div>
+
+  </div>
+
+)}
+        {/* EMPLOYEES PAGE */}
+{activePage === "employees" &&
+  userRole === "Admin" && (
+
+  <div className="bg-white rounded-3xl shadow-xl p-8">
+
+    <div className="flex justify-between items-center mb-8">
+
+      <h2 className="text-4xl font-bold">
+        Employees
+      </h2>
+
+      <input
+        type="text"
+        placeholder="Search employee..."
+        value={searchTerm}
+        onChange={(e) =>
+          setSearchTerm(e.target.value)
+        }
+        className="border rounded-2xl px-4 py-3 w-72"
+      />
+
+    </div>
+
+    <table className="w-full">
+
+      <thead>
+
+        <tr className="border-b">
+
+          <th className="text-left py-4">
+            Name
+          </th>
+
+          <th className="text-left py-4">
+            Department
+          </th>
+
+          <th className="text-left py-4">
+            Status
+          </th>
+
+          <th className="text-left py-4">
+            Action
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {employees
+          .filter((employee) =>
+            employee.name
+              .toLowerCase()
+              .includes(
+                searchTerm.toLowerCase()
+              )
+          )
+          .map((employee) => (
+
+          <tr
+            key={employee._id}
+            className="border-b hover:bg-gray-50"
+          >
+
+            <td className="py-5 font-semibold text-blue-600">
+              {employee.name}
+            </td>
+
+            <td className="py-5">
+              {employee.department}
+            </td>
+
+            <td className="py-5">
+
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  employee.status === "Present"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }`}
+              >
+                {employee.status}
+              </span>
+
+            </td>
+
+            <td className="py-5 flex gap-3">
+
+              <button
+                onClick={() =>
+                  editEmployee(employee)
+                }
+                className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-xl"
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() =>
+                  deleteEmployee(employee._id)
+                }
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl"
+              >
+                Delete
+              </button>
+
+            </td>
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+)}
+{/* ATTENDANCE PAGE */}
+{activePage === "attendance" && (
+
+  <div className="bg-white rounded-3xl shadow-xl p-8">
+
+    <div className="flex justify-between items-center mb-8">
+
+      <h2 className="text-4xl font-bold">
+        Attendance Management
+      </h2>
+
+      <div className="bg-blue-100 text-blue-700 px-5 py-3 rounded-2xl font-semibold">
+        Total Employees: {employees.length}
+      </div>
+
+    </div>
+
+    <table className="w-full">
+
+      <thead>
+
+        <tr className="border-b">
+
+          <th className="text-left py-4">
+            Employee
+          </th>
+
+          <th className="text-left py-4">
+            Department
+          </th>
+
+          <th className="text-left py-4">
+            Status
+          </th>
+
+          <th className="text-left py-4">
+            Action
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {employees.map((employee) => (
+
+          <tr
+            key={employee._id}
+            className="border-b hover:bg-gray-50"
+          >
+
+            <td className="py-5 font-semibold">
+              {employee.name}
+            </td>
+
+            <td className="py-5">
+              {employee.department}
+            </td>
+
+            <td className="py-5">
+
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  employee.status === "Present"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }`}
+              >
+                {employee.status}
+              </span>
+
+            </td>
+
+            <td className="py-5">
+
+              <button
+                onClick={() =>
+                  toggleStatus(employee)
+                }
+                className={`px-5 py-2 rounded-xl text-white font-semibold ${
+                  employee.status === "Present"
+                    ? "bg-yellow-500 hover:bg-yellow-600"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
+              >
+
+                {employee.status === "Present"
+                  ? "Mark Leave"
+                  : "Mark Present"}
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+)}
+
+{/* LEAVE PAGE */}
+{activePage === "leave" && (
+
+  <div className="bg-white rounded-3xl shadow-xl p-8">
+
+    <div className="flex justify-between items-center mb-8">
+
+      <h2 className="text-4xl font-bold">
+        Leave Management
+      </h2>
+
+      <button
+        onClick={() =>
+          setShowLeaveModal(true)
+        }
+        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl"
+      >
+        Apply Leave
+      </button>
+
+    </div>
+
+    <table className="w-full">
+
+      <thead>
+
+        <tr className="border-b">
+
+          <th className="text-left py-4">
+            Employee
+          </th>
+
+          <th className="text-left py-4">
+            Leave Type
+          </th>
+
+          <th className="text-left py-4">
+            Days
+          </th>
+
+          <th className="text-left py-4">
+            Status
+          </th>
+
+          {userRole === "Admin" && (
+            <th className="text-left py-4">
+              Action
+            </th>
+          )}
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {leaves.map((leave, index) => (
+
+          <tr
+            key={index}
+            className="border-b hover:bg-gray-50"
+          >
+
+            <td className="py-5">
+              {leave.employee}
+            </td>
+
+            <td className="py-5">
+              {leave.type}
+            </td>
+
+            <td className="py-5">
+              {leave.days}
+            </td>
+
+            <td className="py-5">
+
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  leave.status === "Approved"
+                    ? "bg-green-100 text-green-700"
+                    : leave.status === "Rejected"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }`}
+              >
+                {leave.status}
+              </span>
+
+            </td>
+
+            {userRole === "Admin" && (
+
+              <td className="py-5 flex gap-3">
+
+                <button
+                  onClick={() =>
+                    updateLeaveStatus(
+                      index,
+                      "Approved"
+                    )
+                  }
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl"
+                >
+                  Approve
+                </button>
+
+                <button
+                  onClick={() =>
+                    updateLeaveStatus(
+                      index,
+                      "Rejected"
+                    )
+                  }
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl"
+                >
+                  Reject
+                </button>
+
+              </td>
+
+            )}
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+)}
+      </div>
+    </div>
+  );
 }
