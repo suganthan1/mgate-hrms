@@ -1009,6 +1009,70 @@ export default function HRMSApp() {
   </div>
 
 )}
+{/* PAYROLL PAGE */}
+{activePage === "payroll" &&
+  userRole === "Admin" && (
+
+  <div className="bg-white rounded-3xl shadow-xl p-8">
+
+    <h2 className="text-4xl font-bold mb-8">
+      Payroll Management
+    </h2>
+
+    <table className="w-full">
+
+      <thead>
+
+        <tr className="border-b">
+
+          <th className="text-left py-4">
+            Employee
+          </th>
+
+          <th className="text-left py-4">
+            Department
+          </th>
+
+          <th className="text-left py-4">
+            Salary
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {employees.map((employee) => (
+
+          <tr
+            key={employee._id}
+            className="border-b hover:bg-gray-50"
+          >
+
+            <td className="py-5">
+              {employee.name}
+            </td>
+
+            <td className="py-5">
+              {employee.department}
+            </td>
+
+            <td className="py-5 font-semibold text-green-600">
+              ₹25,000
+            </td>
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+)}
       </div>
     </div>
   );
