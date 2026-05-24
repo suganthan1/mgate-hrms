@@ -47,6 +47,55 @@ const [departmentName, setDepartmentName] = useState("");
 
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [leaveRequests, setLeaveRequests] =
+  useState([
+    {
+      id: 1,
+      employee: "Santhosh G",
+      leaveType: "Sick Leave",
+      from: "24 May 2026",
+      to: "26 May 2026",
+      reason: "Fever",
+      status: "Pending",
+    },
+    {
+      id: 2,
+      employee: "Aravinth M",
+      leaveType: "Casual Leave",
+      from: "28 May 2026",
+      to: "29 May 2026",
+      reason: "Personal Work",
+      status: "Approved",
+    },
+  ]);
+  const approveLeave = (id) => {
+
+  setLeaveRequests(
+    leaveRequests.map((leave) =>
+      leave.id === id
+        ? {
+            ...leave,
+            status: "Approved",
+          }
+        : leave
+    )
+  );
+
+};
+const rejectLeave = (id) => {
+
+  setLeaveRequests(
+    leaveRequests.map((leave) =>
+      leave.id === id
+        ? {
+            ...leave,
+            status: "Rejected",
+          }
+        : leave
+    )
+  );
+
+};
   
 
   // LEAVE
@@ -185,38 +234,17 @@ const deleteDepartment = (index) => {
 };
 
 
-// CHECK IN
-const handleCheckIn = () => {
-
-  const currentTime =
-    new Date().toLocaleTimeString();
-
-  setCheckInTime(currentTime);
-
-  alert(
-    `Checked In at ${currentTime}`
-  );
-
-};
-
-
-// CHECK OUT
-const handleCheckOut = () => {
-
-  const currentTime =
-    new Date().toLocaleTimeString();
-
-  setCheckOutTime(currentTime);
-
-  alert(
-    `Checked Out at ${currentTime}`
-  );
-
-};
   // DELETE EMPLOYEE
   const deleteEmployee = async (id) => {
 
-    try {
+    const confirmDelete =
+  window.confirm(
+    "Are you sure you want to delete this employee?"
+  );
+
+if (!confirmDelete) return;
+
+try {
 
       await axios.delete(
         `http://localhost:5000/employees/${id}`
@@ -913,9 +941,18 @@ const handleCheckOut = () => {
             className="border-b hover:bg-gray-50"
           >
 
-            <td className="py-5 font-semibold text-blue-600">
-              {employee.name}
-            </td>
+           <td className="py-5">
+
+  <button
+    onClick={() =>
+      setSelectedEmployee(employee)
+    }
+    className="font-semibold text-blue-600 hover:underline"
+  >
+    {employee.name}
+  </button>
+
+</td>
 
             <td className="py-5">
               {employee.department}
@@ -1367,133 +1404,162 @@ const handleCheckOut = () => {
 {/* LEAVE PAGE */}
 {activePage === "leave" && (
 
-  <div className="bg-white rounded-3xl shadow-xl p-8">
+  <div className="space-y-8">
 
-    <div className="flex justify-between items-center mb-8">
+    {/* HEADER */}
+    <div className="bg-white rounded-3xl shadow-xl p-8 flex justify-between items-center">
 
-      <h2 className="text-4xl font-bold">
-        Leave Management
-      </h2>
+      <div>
 
-      <button
-        onClick={() =>
-          setShowLeaveModal(true)
-        }
-        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl"
-      >
-        Apply Leave
-      </button>
+        <h2 className="text-4xl font-bold">
+          Leave Management
+        </h2>
+
+        <p className="text-gray-500 mt-2">
+          Approve or reject employee leave requests
+        </p>
+
+      </div>
 
     </div>
 
-    <table className="w-full">
+    {/* LEAVE TABLE */}
+    <div className="bg-white rounded-3xl shadow-xl p-8">
 
-      <thead>
+      <table className="w-full">
 
-        <tr className="border-b">
+        <thead>
 
-          <th className="text-left py-4">
-            Employee
-          </th>
+          <tr className="border-b">
 
-          <th className="text-left py-4">
-            Leave Type
-          </th>
+            <th className="text-left py-4">
+              Employee
+            </th>
 
-          <th className="text-left py-4">
-            Days
-          </th>
+            <th className="text-left py-4">
+              Leave Type
+            </th>
 
-          <th className="text-left py-4">
-            Status
-          </th>
+            <th className="text-left py-4">
+              From
+            </th>
 
-          {userRole === "Admin" && (
+            <th className="text-left py-4">
+              To
+            </th>
+
+            <th className="text-left py-4">
+              Reason
+            </th>
+
+            <th className="text-left py-4">
+              Status
+            </th>
+
             <th className="text-left py-4">
               Action
             </th>
-          )}
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        {leaves.map((leave, index) => (
-
-          <tr
-            key={index}
-            className="border-b hover:bg-gray-50"
-          >
-
-            <td className="py-5">
-              {leave.employee}
-            </td>
-
-            <td className="py-5">
-              {leave.type}
-            </td>
-
-            <td className="py-5">
-              {leave.days}
-            </td>
-
-            <td className="py-5">
-
-              <span
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  leave.status === "Approved"
-                    ? "bg-green-100 text-green-700"
-                    : leave.status === "Rejected"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {leave.status}
-              </span>
-
-            </td>
-
-            {userRole === "Admin" && (
-
-              <td className="py-5 flex gap-3">
-
-                <button
-                  onClick={() =>
-                    updateLeaveStatus(
-                      index,
-                      "Approved"
-                    )
-                  }
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl"
-                >
-                  Approve
-                </button>
-
-                <button
-                  onClick={() =>
-                    updateLeaveStatus(
-                      index,
-                      "Rejected"
-                    )
-                  }
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl"
-                >
-                  Reject
-                </button>
-
-              </td>
-
-            )}
 
           </tr>
 
-        ))}
+        </thead>
 
-      </tbody>
+        <tbody>
 
-    </table>
+
+  {leaveRequests.map((leave) => (
+
+    <tr
+      key={leave.id}
+      className="border-b hover:bg-gray-50"
+    >
+
+      <td className="py-5 font-semibold">
+        {leave.employee}
+      </td>
+
+      <td className="py-5">
+        {leave.leaveType}
+      </td>
+
+      <td className="py-5">
+        {leave.from}
+      </td>
+
+      <td className="py-5">
+        {leave.to}
+      </td>
+
+      <td className="py-5">
+        {leave.reason}
+      </td>
+
+      <td className="py-5">
+
+        <span
+          className={`px-4 py-2 rounded-full text-sm ${
+            leave.status === "Approved"
+              ? "bg-green-100 text-green-700"
+              : leave.status === "Rejected"
+              ? "bg-red-100 text-red-700"
+              : "bg-yellow-100 text-yellow-700"
+          }`}
+        >
+          {leave.status}
+        </span>
+
+      </td>
+
+      <td className="py-5 flex gap-3">
+
+        {leave.status === "Pending" ? (
+          <>
+
+            <button
+              onClick={() =>
+                approveLeave(leave.id)
+              }
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm"
+            >
+              Approve
+            </button>
+
+            <button
+              onClick={() =>
+                rejectLeave(leave.id)
+              }
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm"
+            >
+              Reject
+            </button>
+
+          </>
+        ) : (
+
+          <button
+            className={`px-4 py-2 rounded-xl text-white text-sm ${
+              leave.status === "Approved"
+                ? "bg-green-500"
+                : "bg-red-500"
+            }`}
+          >
+            {leave.status}
+          </button>
+
+        )}
+
+      </td>
+
+    </tr>
+
+  ))}
+
+</tbody>
+
+
+      </table>
+
+    </div>
 
   </div>
 
