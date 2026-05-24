@@ -48,52 +48,47 @@ const [departmentName, setDepartmentName] = useState("");
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [leaveRequests, setLeaveRequests] =
-  useState([
-    {
-      id: 1,
-      employee: "Santhosh G",
-      leaveType: "Sick Leave",
-      from: "24 May 2026",
-      to: "26 May 2026",
-      reason: "Fever",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      employee: "Aravinth M",
-      leaveType: "Casual Leave",
-      from: "28 May 2026",
-      to: "29 May 2026",
-      reason: "Personal Work",
-      status: "Approved",
-    },
-  ]);
-  const approveLeave = (id) => {
+  useState([]);
+  
+ const approveLeave = async (id) => {
 
-  setLeaveRequests(
-    leaveRequests.map((leave) =>
-      leave.id === id
-        ? {
-            ...leave,
-            status: "Approved",
-          }
-        : leave
-    )
-  );
+  try {
+
+    await axios.put(
+      `http://localhost:5000/leaves/${id}`,
+      {
+        status: "Approved",
+      }
+    );
+
+    fetchLeaves();
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
 
 };
-const rejectLeave = (id) => {
 
-  setLeaveRequests(
-    leaveRequests.map((leave) =>
-      leave.id === id
-        ? {
-            ...leave,
-            status: "Rejected",
-          }
-        : leave
-    )
-  );
+const rejectLeave = async (id) => {
+
+  try {
+
+    await axios.put(
+      `http://localhost:5000/leaves/${id}`,
+      {
+        status: "Rejected",
+      }
+    );
+
+    fetchLeaves();
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
 
 };
   
@@ -129,25 +124,44 @@ const rejectLeave = (id) => {
   const [leaveType, setLeaveType] = useState("");
   const [leaveDays, setLeaveDays] = useState("");
 
-  // FETCH EMPLOYEES
-  const fetchEmployees = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:5000/employees"
+ // FETCH LEAVES
+const fetchLeaves = async () => {
+
+  try {
+
+    const response =
+      await axios.get(
+        "http://localhost:5000/leaves"
       );
 
-      setEmployees(response.data);
+    setLeaveRequests(response.data);
 
-    } catch (error) {
+  } catch (error) {
 
-      console.log(error);
+    console.log(error);
 
-    }
-  };
+  }
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+};
+
+// FETCH EMPLOYEES
+const fetchEmployees = async () => {
+
+  try {
+
+    const response = await axios.get(
+      "http://localhost:5000/employees"
+    );
+
+    setEmployees(response.data);
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+};
 
   // ADD EMPLOYEE
 const addEmployee = async () => {
@@ -1855,5 +1869,4 @@ setSalary(employee.salary);
   </div>
 
 );
-
 }

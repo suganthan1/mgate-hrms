@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const User = require("./models/User");
+const Leave = require("./models/Leave");
 
 const app = express();
 
@@ -127,6 +128,36 @@ app.delete("/employees/:id", async (req, res) => {
 
 // SERVER
 app.listen(5000, () => {
+  app.get("/leaves", async (req, res) => {
+
+  const leaves =
+    await Leave.find();
+
+  res.json(leaves);
+
+});
+app.post("/leaves", async (req, res) => {
+
+  const leave =
+    new Leave(req.body);
+
+  await leave.save();
+
+  res.json(leave);
+
+});
+app.put("/leaves/:id", async (req, res) => {
+
+  const updatedLeave =
+    await Leave.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+  res.json(updatedLeave);
+
+});
 
   console.log(
     "Server running on port 5000"
