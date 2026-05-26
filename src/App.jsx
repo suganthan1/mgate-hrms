@@ -21,6 +21,12 @@ export default function HRMSApp() {
   = useState(false);
   const [userRole, setUserRole] =
    useState("Admin");
+  const [loggedInEmployee,
+  setLoggedInEmployee] =
+    useState(null);
+  const [profileImage,
+  setProfileImage] =
+    useState("");
   
 
   const [email, setEmail] = useState("");
@@ -87,6 +93,9 @@ const [departmentName, setDepartmentName] = useState("");
    useState("");
   const [notification, setNotification] =
    useState("");
+   const [notificationType,
+  setNotificationType] =
+    useState("success");
   const [holidays] = useState([
   {
     name: "New Year",
@@ -101,8 +110,7 @@ const [departmentName, setDepartmentName] = useState("");
     date: "2026-01-26",
   },
 ]);
-const [profileImage, setProfileImage] =
-  useState(null);
+
 
 const [attendanceRecords, setAttendanceRecords] =
   useState([]);
@@ -215,11 +223,27 @@ useEffect(() => {
       "role"
     );
 
+  const employee =
+    JSON.parse(
+      localStorage.getItem(
+        "employee"
+      )
+    );
+
   if (token) {
 
     setIsLoggedIn(true);
 
     setUserRole(role);
+
+    setLoggedInEmployee(
+      employee
+    );
+ setProfileImage(
+  localStorage.getItem(
+    "profileImage"
+  ) || ""
+);
 
   }
 
@@ -734,6 +758,9 @@ setSalary(employee.salary);
     setUserRole(
       response.data.role
     );
+    setLoggedInEmployee(
+  response.data.employee
+);
     localStorage.setItem(
   "token",
   response.data.token
@@ -742,6 +769,12 @@ setSalary(employee.salary);
 localStorage.setItem(
   "role",
   response.data.role
+);
+localStorage.setItem(
+  "employee",
+  JSON.stringify(
+    response.data.employee
+  )
 );
 
     setIsLoggedIn(true);
@@ -1019,14 +1052,21 @@ localStorage.setItem(
 </div>
 {notification && (
 
-  <div className="bg-green-100 text-green-700 px-6 py-4 rounded-2xl mb-6 shadow-lg">
+  <div
+    className={`px-6 py-4 rounded-2xl mb-6 shadow-lg text-white animate-pulse ${
+      notificationType === "success"
+        ? "bg-green-600"
+        : notificationType === "error"
+        ? "bg-red-600"
+        : "bg-yellow-500"
+    }`}
+  >
 
     {notification}
 
   </div>
 
 )}
-
        {/* DASHBOARD */}
 {activePage === "dashboard" && (
 
@@ -2691,32 +2731,51 @@ localStorage.setItem(
       </div>
       <div className="flex flex-col items-center">
 
-  <img
-    src={
-      profileImage ||
-      "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-    }
-    alt="profile"
-    className="w-28 h-28 rounded-full object-cover mb-4"
-  />
+  
 
   <input
     type="file"
     accept="image/*"
     onChange={(e) => {
 
-      const file =
-        e.target.files[0];
+  const file =
+    e.target.files[0];
 
-      if (file) {
+  if (file) {
 
-        setProfileImage(
-          URL.createObjectURL(file)
-        );
+    const reader =
+      new FileReader();
 
-      }
+    reader.onloadend = () => {
 
-    }}
+      setProfileImage(
+        reader.result
+      );
+
+      localStorage.setItem(
+        "profileImage",
+        reader.result
+      );
+
+    };
+
+    reader.readAsDataURL(file);
+
+  }
+
+}}
+  />
+
+</div>
+<div className="flex justify-center mb-6">
+
+  <img
+    src={
+      profileImage ||
+      "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+    }
+    alt="profile"
+    className="w-28 h-28 rounded-full object-cover border-4 border-blue-500"
   />
 
 </div>
@@ -2730,8 +2789,8 @@ localStorage.setItem(
           </p>
 
           <h3 className="font-bold">
-            Suganthan S
-          </h3>
+  {loggedInEmployee?.name}
+</h3>
 
         </div>
 
@@ -2742,7 +2801,7 @@ localStorage.setItem(
           </p>
 
           <h3 className="font-bold">
-            IT
+            {loggedInEmployee?.department}
           </h3>
 
         </div>
@@ -2754,7 +2813,7 @@ localStorage.setItem(
           </p>
 
           <h3 className="font-bold">
-            Employee
+            {loggedInEmployee?.role}
           </h3>
 
         </div>
@@ -2766,7 +2825,7 @@ localStorage.setItem(
           </p>
 
           <h3 className="font-bold">
-            employee@mgatetech.com
+            {loggedInEmployee?.email}
           </h3>
 
         </div>

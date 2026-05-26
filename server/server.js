@@ -53,6 +53,10 @@ const employeeSchema =
     joiningDate: String,
     salary: String,
     status: String,
+    leaveBalance: {
+  type: Number,
+  default: 20,
+},
 
   });
   const leaveSchema =
