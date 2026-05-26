@@ -52,6 +52,7 @@ const employeeSchema =
     role: String,
     joiningDate: String,
     salary: String,
+    reportingManager: String,
     status: String,
     leaveBalance: {
   type: Number,
@@ -72,11 +73,12 @@ const employeeSchema =
 
     reason: String,
 
-    status: {
-      type: String,
-      default: "Pending",
-    },
+    status: String,
 
+approvalStage: {
+  type: String,
+  default: "Manager",
+},
   });
 
 const Leave =

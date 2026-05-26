@@ -56,6 +56,9 @@ const [departmentName, setDepartmentName] = useState("");
   const [employeeEmail, setEmployeeEmail] = useState("");
   const [employeePhone, setEmployeePhone] = useState("");
   const [employeeRole, setEmployeeRole] = useState("");
+  const [reportingManager,
+  setReportingManager] =
+    useState("");
   const [joiningDate, setJoiningDate] = useState("");
   const [salary, setSalary] = useState("");
 
@@ -96,6 +99,16 @@ const [departmentName, setDepartmentName] = useState("");
    const [notificationType,
   setNotificationType] =
     useState("success");
+
+const hasAccess = (
+  allowedRoles
+) => {
+
+  return allowedRoles.includes(
+    userRole
+  );
+
+};
   const [holidays] = useState([
   {
     name: "New Year",
@@ -284,19 +297,21 @@ const addEmployee = async () => {
     joiningDate: joiningDate,
 
     salary: salary,
+    reportingManager:
+  reportingManager, 
 
     status: "Present",
   }
 );
     setEmployeeName("");
-    setDepartment("");
-    setEmployeeEmail("");
-    setPassword("");
-    setEmployeePhone("");
-    setEmployeeRole("");
-    setJoiningDate("");
-    setSalary("");
-    setEmployeeRole("");
+setDepartment("");
+setEmployeeEmail("");
+setPassword("");
+setEmployeePhone("");
+setEmployeeRole("");
+setJoiningDate("");
+setSalary("");
+setReportingManager("");
 
 setJoiningDate("");
 
@@ -656,6 +671,37 @@ setSalary(employee.salary);
   );
 
 };
+const filteredEmployees =
+  employees
+    .filter((employee) => {
+
+      const matchesSearch =
+        employee.name
+          .toLowerCase()
+          .includes(
+            searchTerm.toLowerCase()
+          );
+
+      const matchesStatus =
+        statusFilter === "All"
+          ? true
+          : employee.status ===
+            statusFilter;
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+
+    });
+
+const teamMembers =
+  employees.filter(
+    (employee) =>
+
+      employee.reportingManager ===
+      loggedInEmployee?.name
+  );
 
   // LOGIN PAGE
   if (!isLoggedIn) {
@@ -893,36 +939,45 @@ localStorage.setItem(
       Dashboard
     </li>
 
-    {userRole === "Admin" && (
-      <li
-        onClick={() =>
-          setActivePage("employees")
-        }
-        className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-          activePage === "employees"
-            ? "bg-blue-600 text-white"
-            : "hover:bg-gray-200"
-        }`}
-      >
-        Employees
-      </li>
-    )}
+{[
+  "Super Admin",
+  "HR",
+].includes(userRole) && (
 
-    {userRole === "Admin" && (
-      <li
-        onClick={() =>
-          setActivePage("departments")
-        }
-        className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-          activePage === "departments"
-            ? "bg-blue-600 text-white"
-            : "hover:bg-gray-200"
-        }`}
-      >
-        Departments
-      </li>
-    )}
+  <li
+    onClick={() =>
+      setActivePage("employees")
+    }
+    className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+      activePage === "employees"
+        ? "bg-blue-600 text-white"
+        : "hover:bg-gray-200"
+    }`}
+  >
+    Employees
+  </li>
 
+)}
+
+   {[
+  "Super Admin",
+  "HR",
+].includes(userRole) && (
+
+  <li
+    onClick={() =>
+      setActivePage("departments")
+    }
+    className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+      activePage === "departments"
+        ? "bg-blue-600 text-white"
+        : "hover:bg-gray-200"
+    }`}
+  >
+    Departments
+  </li>
+
+)}
     <li
       onClick={() =>
         setActivePage("attendance")
@@ -948,21 +1003,25 @@ localStorage.setItem(
     >
       Leave
     </li>
+{[
+  "Super Admin",
+  "Finance",
+].includes(userRole) && (
 
-    {userRole === "Admin" && (
-      <li
-        onClick={() =>
-          setActivePage("payroll")
-        }
-        className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-          activePage === "payroll"
-            ? "bg-blue-600 text-white"
-            : "hover:bg-gray-200"
-        }`}
-      >
-        Payroll
-      </li>
-    )}
+  <li
+    onClick={() =>
+      setActivePage("payroll")
+    }
+    className={`px-6 py-3 rounded-xl cursor-pointer transition ${
+      activePage === "payroll"
+        ? "bg-blue-600 text-white"
+        : "hover:bg-gray-200"
+    }`}
+  >
+    Payroll
+  </li>
+
+)}
 
   </ul>
 
@@ -1258,7 +1317,10 @@ localStorage.setItem(
 
        {/* EMPLOYEES PAGE */}
 {activePage === "employees" &&
-  userRole === "Admin" && (
+  hasAccess([
+  "Super Admin",
+  "HR",
+]) && (
 
   <div className="bg-white rounded-3xl shadow-xl p-8 mt-8">
 
@@ -1327,23 +1389,27 @@ localStorage.setItem(
 
   <tr className="border-b">
 
-    <th className="text-left py-4">
-      Name
-    </th>
+  <th className="text-left py-4">
+    Name
+  </th>
 
-    <th className="text-left py-4">
-      Department
-    </th>
+  <th className="text-left py-4">
+    Department
+  </th>
 
-    <th className="text-left py-4">
-      Status
-    </th>
+  <th className="text-left py-4">
+    Reporting Manager
+  </th>
 
-    <th className="text-left py-4">
-      Action
-    </th>
+  <th className="text-left py-4">
+    Status
+  </th>
 
-  </tr>
+  <th className="text-left py-4">
+  Salary
+</th>
+
+</tr>
 
 </thead>
 
@@ -1384,12 +1450,15 @@ localStorage.setItem(
         ? true
         : employee.status === statusFilter;
 
+
     return (
       matchesSearch &&
       matchesStatus
     );
 
   })
+  
+  
     
 
   .sort((a, b) =>
@@ -1418,24 +1487,32 @@ localStorage.setItem(
 </td>
 
             <td className="py-5">
-              {employee.department}
-            </td>
+  {employee.department}
+</td>
 
-            <td className="py-5">
+<td className="py-5">
+  {employee.reportingManager || "N/A"}
+</td>
 
-              <span
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  employee.status === "Present"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {employee.status}
-              </span>
+<td className="py-5">
 
-            </td>
+  <span
+    className={`px-4 py-2 rounded-full text-sm font-semibold ${
+      employee.status === "Present"
+        ? "bg-green-100 text-green-700"
+        : "bg-yellow-100 text-yellow-700"
+    }`}
+  >
+    {employee.status}
+  </span>
 
-            <td className="py-5 flex gap-3">
+</td>
+
+<td className="py-5 font-bold text-green-600">
+  ₹{employee.salary || 25000}
+</td>
+
+<td className="py-5 flex gap-3">
 
               <button
                 onClick={() =>
@@ -1469,7 +1546,10 @@ localStorage.setItem(
 )}
 {/* DEPARTMENTS PAGE */}
 {activePage === "departments" &&
-  userRole === "Admin" && (
+  hasAccess([
+  "Super Admin",
+  "HR",
+])&& (
 
   <div
     className={`rounded-3xl shadow-xl p-8 ${
@@ -2167,16 +2247,60 @@ localStorage.setItem(
   className="w-full border p-3 rounded-xl"
 />
 
-<input
-  type="text"
-  placeholder="Role"
+<select
   value={employeeRole}
   onChange={(e) =>
-    setEmployeeRole(e.target.value)
+    setEmployeeRole(
+      e.target.value
+    )
+  }
+  className="w-full border p-3 rounded-xl"
+>
+
+  <option value="">
+    Select Role
+  </option>
+
+  <option value="Super Admin">
+    Super Admin
+  </option>
+
+  <option value="HR">
+    HR
+  </option>
+
+  <option value="Manager">
+    Manager
+  </option>
+
+  <option value="Team Lead">
+    Team Lead
+  </option>
+
+  <option value="Finance">
+    Finance
+  </option>
+
+  <option value="IT Admin">
+    IT Admin
+  </option>
+
+  <option value="Employee">
+    Employee
+  </option>
+
+</select>
+<input
+  type="text"
+  placeholder="Reporting Manager"
+  value={reportingManager}
+  onChange={(e) =>
+    setReportingManager(
+      e.target.value
+    )
   }
   className="w-full border p-3 rounded-xl"
 />
-
 <input
   type="date"
   value={joiningDate}
@@ -2350,15 +2474,23 @@ localStorage.setItem(
 
     <thead>
 
-      <tr className="border-b">
+  <tr className="border-b">
 
-        <th className="text-left py-4">Employee</th>
-        <th className="text-left py-4">Leave Type</th>
-        <th className="text-left py-4">From</th>
-        <th className="text-left py-4">To</th>
-        <th className="text-left py-4">Reason</th>
-        <th className="text-left py-4">Status</th>
-        <th className="text-left py-4">Action</th>
+    <th className="text-left py-4">Employee</th>
+
+    <th className="text-left py-4">Leave Type</th>
+
+    <th className="text-left py-4">From</th>
+
+    <th className="text-left py-4">To</th>
+
+    <th className="text-left py-4">Reason</th>
+    
+    <th className="text-left py-4">
+  Approval Stage
+</th>
+
+    <th className="text-left py-4">Status</th>
 
       </tr>
 
@@ -2392,6 +2524,15 @@ localStorage.setItem(
     <td className="py-5">
       {leave.reason}
     </td>
+    <td className="py-5">
+
+  <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm">
+
+    {leave.approvalStage}
+
+  </span>
+
+</td>
 
     <td className="py-5">
 
@@ -2631,6 +2772,9 @@ localStorage.setItem(
             <td className="py-5">
               {employee.department}
             </td>
+            <td className="py-5">
+  {employee.reportingManager}
+</td>
 
             <td className="py-5">
 
