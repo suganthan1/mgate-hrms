@@ -1441,86 +1441,86 @@ setSalary(employee.salary);
 
     <table className="w-full">
 
-      <thead>
+  <thead>
 
-        <tr className="border-b">
+    <tr className="border-b">
 
-          <th className="text-left py-4">
-            Department Name
-          </th>
+      <th className="text-left py-4">
+        Department
+      </th>
 
-          <th className="text-left py-4">
-            Total Employees
-          </th>
+      <th className="text-left py-4">
+        Employees
+      </th>
 
-          <th className="text-left py-4">
-            Status
-          </th>
-          <th className="text-left py-4">
-  Action
-</th>
+      <th className="text-left py-4">
+        Status
+      </th>
+
+      <th className="text-left py-4">
+        Action
+      </th>
+
+    </tr>
+
+  </thead>
+
+  <tbody>
+
+    {departments.map(
+      (dept, index) => (
+
+        <tr
+          key={index}
+          className="border-b"
+        >
+
+          <td className="py-5 font-semibold">
+            {dept}
+          </td>
+
+          <td className="py-5">
+
+            {
+              employees.filter(
+                (emp) =>
+                  emp.department === dept
+              ).length
+            }
+
+          </td>
+
+          <td className="py-5">
+
+            <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm">
+
+              Active
+
+            </span>
+
+          </td>
+
+          <td className="py-5">
+
+            <button
+              onClick={() =>
+                deleteDepartment(index)
+              }
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl"
+            >
+              Delete
+            </button>
+
+          </td>
 
         </tr>
 
-      </thead>
+      )
+    )}
 
-      <tbody>
+  </tbody>
 
-  {departments.map(
-    (dept, index) => (
-
-      <tr
-        key={index}
-        className="border-b"
-      >
-
-        <td className="py-5 font-semibold">
-          {dept}
-        </td>
-
-        <td className="py-5">
-
-          {
-            employees.filter(
-              (emp) =>
-                emp.department === dept
-            ).length
-          }
-
-        </td>
-
-        <td className="py-5">
-
-          <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm">
-
-            Active
-
-          </span>
-
-        </td>
-
-        <td className="py-5">
-
-          <button
-            onClick={() =>
-              deleteDepartment(index)
-            }
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl"
-          >
-            Delete
-          </button>
-
-        </td>
-
-      </tr>
-
-    )
-  )}
-
-</tbody>
-      </tbody>
-
-    </table>
+</table>
 
   </div>
 
