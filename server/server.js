@@ -5,6 +5,9 @@ const User = require("./models/User");
 const jwt = require("jsonwebtoken");
 
 const bcrypt = require("bcryptjs");
+const authMiddleware =
+  require("./middleware/authMiddleware");
+
 
 
 
@@ -117,7 +120,6 @@ const Employee = mongoose.model(
   "Employee",
   employeeSchema
 );
-
 // LOGIN API
 app.post(
   "/login",
@@ -164,7 +166,7 @@ app.post(
             role: employee.role,
           },
 
-          JWT_SECRET,
+         "mgate_secret_key",
 
           {
             expiresIn: "1d",
@@ -195,7 +197,9 @@ app.post(
   }
 );
 // GET Employees
-app.get("/employees", async (req, res) => {
+app.get(
+  "/employees",
+  authMiddleware, async (req, res) => {
 
   const employees =
     await Employee.find();
@@ -205,7 +209,9 @@ app.get("/employees", async (req, res) => {
 });
 
 // ADD Employee
-app.post("/employees", async (req, res) => {
+app.post(
+  "/employees",
+  authMiddleware, async (req, res) => {
   const hashedPassword =
   await bcrypt.hash(
     req.body.password,
@@ -244,7 +250,9 @@ app.put("/employees/:id", async (req, res) => {
 });
 
 // DELETE Employee
-app.delete("/employees/:id", async (req, res) => {
+app.delete(
+  "/employees/:id",
+  authMiddleware, async (req, res) => {
 
   await Employee.findByIdAndDelete(
     req.params.id

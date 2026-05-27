@@ -54,6 +54,10 @@ const [departmentName, setDepartmentName] = useState("");
   const [employeeName, setEmployeeName] = useState("");
   const [department, setDepartment] = useState("");
   const [employeeEmail, setEmployeeEmail] = useState("");
+  const [
+  employeePassword,
+  setEmployeePassword,
+] = useState("");
   const [employeePhone, setEmployeePhone] = useState("");
   const [employeeRole, setEmployeeRole] = useState("");
   const [reportingManager,
@@ -132,10 +136,18 @@ const fetchAttendance = async () => {
 
   try {
 
-    const response =
-      await axios.get(
-        "http://localhost:5000/attendance"
-      );
+   const response =
+  await axios.get(
+
+    "http://localhost:5000/attendance",
+
+    {
+      headers: {
+        authorization: token,
+      },
+    }
+
+  );
 
     setAttendanceRecords(
       response.data
@@ -201,15 +213,50 @@ const fetchEmployees = async () => {
 
   try {
 
-    const response = await axios.get(
-      "http://localhost:5000/employees"
-    );
+    const response =
+      await axios.get(
 
-    setEmployees(response.data);
+        "http://localhost:5000/employees",
+
+        {
+          headers: {
+            authorization: token,
+          },
+        }
+
+      );
+
+    setEmployees(
+      response.data
+    );
 
   } catch (error) {
 
     console.log(error);
+
+    if (
+      error.response?.status === 401
+    ) {
+
+      localStorage.removeItem(
+        "token"
+      );
+
+      localStorage.removeItem(
+        "employee"
+      );
+
+      localStorage.removeItem(
+        "role"
+      );
+
+      setIsLoggedIn(false);
+
+      alert(
+        "Session Expired. Login Again."
+      );
+
+    }
 
   }
 
@@ -280,7 +327,9 @@ const addEmployee = async () => {
   try {
 
    await axios.post(
+
   "http://localhost:5000/employees",
+
   {
     name: employeeName,
 
@@ -288,7 +337,7 @@ const addEmployee = async () => {
 
     email: employeeEmail,
 
-    password: password,
+    password: employeePassword,
 
     phone: employeePhone,
 
@@ -297,16 +346,24 @@ const addEmployee = async () => {
     joiningDate: joiningDate,
 
     salary: salary,
+
     reportingManager:
-  reportingManager, 
+      reportingManager,
 
     status: "Present",
+  },
+
+  {
+    headers: {
+      authorization: token,
+    },
   }
+
 );
     setEmployeeName("");
 setDepartment("");
 setEmployeeEmail("");
-setPassword("");
+setEmployeePassword("");
 setEmployeePhone("");
 setEmployeeRole("");
 setJoiningDate("");
@@ -407,10 +464,17 @@ if (!confirmDelete) return;
 
 try {
 
-      await axios.delete(
-        `http://localhost:5000/employees/${id}`
-      );
+     await axios.delete(
 
+  `http://localhost:5000/employees/${id}`,
+
+  {
+    headers: {
+      authorization: token,
+    },
+  }
+
+);
       fetchEmployees();
 
     } catch (error) {
@@ -446,38 +510,52 @@ setSalary(employee.salary);
   // UPDATE EMPLOYEE
   const updateEmployee = async () => {
 
-    try {
+  try {
 
-      await axios.put(
-        `http://localhost:5000/employees/${editingEmployee._id}`,
-        {
-  name: employeeName,
-  department: department,
-  email: employeeEmail,
-  phone: employeePhone,
-  role: employeeRole,
-  joiningDate: joiningDate,
-  salary: salary,
-  status: editingEmployee.status,
-}
-      );
+    await axios.put(
 
-      fetchEmployees();
+      `http://localhost:5000/employees/${editingEmployee._id}`,
 
-      setShowModal(false);
+      {
+        name: employeeName,
+        department: department,
+        email: employeeEmail,
+        phone: employeePhone,
+        role: employeeRole,
+        joiningDate: joiningDate,
+        salary: salary,
+        status: editingEmployee.status,
+      },
 
-      setEditingEmployee(null);
+      {
+        headers: {
+          authorization: token,
+        },
+      }
 
-      setEmployeeName("");
-      setDepartment("");
+    );
 
-    } catch (error) {
+    fetchEmployees();
 
-      console.log(error);
+    setShowModal(false);
 
-    }
-  };
+    setEditingEmployee(null);
 
+    setEmployeeName("");
+    setDepartment("");
+    setEmployeeEmail("");
+    setEmployeePhone("");
+    setEmployeeRole("");
+    setJoiningDate("");
+    setSalary("");
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+};
   // ATTENDANCE
   const toggleStatus = async (employee) => {
 
@@ -2278,9 +2356,11 @@ hasAccess([
 <input
   type="password"
   placeholder="Password"
-  value={password}
+  value={employeePassword}
   onChange={(e) =>
-    setPassword(e.target.value)
+    setEmployeePassword(
+      e.target.value
+    )
   }
   className="w-full border p-3 rounded-xl"
 />
