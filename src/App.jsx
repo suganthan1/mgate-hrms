@@ -995,11 +995,13 @@ localStorage.setItem(
   // MAIN APP
   return (
 
-    <div className={`min-h-screen flex ${
-      darkMode
-        ? "bg-slate-900 text-white"
-        : "bg-slate-100"
-    }`}>
+  <div
+  className={`min-h-screen flex ${
+    darkMode
+      ? "bg-slate-900 text-white"
+      : "bg-slate-100"
+  }`}
+>
 
      <Sidebar
 
@@ -1014,136 +1016,12 @@ localStorage.setItem(
   logo={logo}
 
 />
-
-  {/* MENU */}
-  <ul className="space-y-2 w-full mt-6">
-
-    <li
-      onClick={() =>
-        setActivePage("dashboard")
-      }
-      className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-        activePage === "dashboard"
-          ? "bg-blue-600 text-white"
-          : "hover:bg-gray-200"
-      }`}
-    >
-      Dashboard
-    </li>
-
-{[
-  "Super Admin",
-  "Admin",
-  "Finance",
-].includes(userRole) && (
-  
-  <li
-    onClick={() =>
-      setActivePage("employees")
-    }
-    className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-      activePage === "employees"
-        ? "bg-blue-600 text-white"
-        : "hover:bg-gray-200"
-    }`}
-  >
-    Employees
-  </li>
-
-)} 
-<li
-  onClick={() =>
-    setActivePage("profile")
-  }
-  className={`px-5 py-3 rounded-xl text-lg cursor-pointer transition ${
-    activePage === "profile"
-      ? "bg-blue-600 text-white"
-      : "hover:bg-blue-100 hover:text-blue-700"
-  }`}
->
-  My Profile
-</li>
-
-
-  {[
-  "Super Admin",
-  "Admin",
-  "Finance",
-].includes(userRole) && (
-
-  <li
-    onClick={() =>
-      setActivePage("departments")
-    }
-    className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-      activePage === "departments"
-        ? "bg-blue-600 text-white"
-        : "hover:bg-gray-200"
-    }`}
-  >
-    Departments
-  </li>
-
-)}
-    <li
-      onClick={() =>
-        setActivePage("attendance")
-      }
-      className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-        activePage === "attendance"
-          ? "bg-blue-600 text-white"
-          : "hover:bg-gray-200"
-      }`}
-    >
-      Attendance
-    </li>
-
-    <li
-      onClick={() =>
-        setActivePage("leave")
-      }
-      className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-        activePage === "leave"
-          ? "bg-blue-600 text-white"
-          : "hover:bg-gray-200"
-      }`}
-    >
-      Leave
-    </li>
-{[
-  "Super Admin",
-  "Admin",
-  "Finance",
-].includes(userRole) && (
-
-  <li
-    onClick={() =>
-      setActivePage("payroll")
-    }
-    className={`px-6 py-3 rounded-xl cursor-pointer transition ${
-      activePage === "payroll"
-        ? "bg-blue-600 text-white"
-        : "hover:bg-gray-200"
-    }`}
-  >
-    Payroll
-  </li>
-
-)}
-
-  </ul>
-
-
-
-
-
-
-      {/* MAIN */}
-      <div className="flex-1 p-8">
+ {/* MAIN */}
+      
+<div className="flex-1 p-8">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-8">
-
+        <div className="flex justify-between items-center mb-12">
           <div>
 
             <h1 className="text-5xl font-bold text-blue-700">
