@@ -1,4 +1,14 @@
 import { useState, useEffect } from "react";
+import {
+
+  Routes,
+
+  Route,
+
+  Navigate,
+
+} from "react-router-dom";
+import Login from "./pages/Login";
 import Employees from "./pages/Employees";
 import EmployeeModal from "./components/EmployeeModal";
 import {
@@ -24,6 +34,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import jsPDF from "jspdf";
+import Sidebar from "./components/Sidebar";
 
 
 
@@ -990,19 +1001,19 @@ localStorage.setItem(
         : "bg-slate-100"
     }`}>
 
-     {/* SIDEBAR */}
-<div className="w-64 bg-white shadow-xl p-6 flex flex-col">
+     <Sidebar
 
-  {/* LOGO */}
-  <div className="flex flex-col items-center mb-10">
+  activePage={activePage}
 
-    <img
-      src={logo}
-      alt="logo"
-      className="w-24 h-24 object-contain"
-    />
+  setActivePage={
+    setActivePage
+  }
 
-  </div>
+  userRole={userRole}
+
+  logo={logo}
+
+/>
 
   {/* MENU */}
   <ul className="space-y-2 w-full mt-6">
@@ -1122,7 +1133,7 @@ localStorage.setItem(
 
   </ul>
 
-</div>
+
 
 
 
