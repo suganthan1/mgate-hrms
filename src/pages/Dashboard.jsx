@@ -41,20 +41,20 @@ import {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
 
         {/* TOTAL EMPLOYEES */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
 
           <h2 className="text-xl text-gray-500 mb-8">
             Total Employees
           </h2>
 
-          <p className="text-5xl font-bold text-blue-600">
+          <p className="text-5xl font-bold text-blue-600 mt-auto">
             {employees.length}
           </p>
 
         </div>
 
         {/* PRESENT */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+       <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
 
           <h2 className="text-xl text-gray-500 mb-8">
             Present Employees
@@ -75,7 +75,7 @@ import {
         </div>
 
         {/* ON LEAVE */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
 
           <h2 className="text-xl text-gray-500 mb-8">
             Employees On Leave
@@ -96,7 +96,7 @@ import {
         </div>
 
         {/* PENDING */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
 
           <h2 className="text-xl text-gray-500 mb-8">
             Pending Leaves
@@ -117,13 +117,12 @@ import {
         </div>
 
         {/* TEAM */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-
-          <h2 className="text-xl text-gray-500 mb-8">
+       <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
+              <h2 className="text-xl text-gray-500 mb-8">
             Team Members
           </h2>
 
-          <p className="text-5xl font-bold text-blue-600">
+          <p className="text-5xl font-bold text-blue-600 mt-auto">
             {employees.length}
           </p>
 

@@ -318,6 +318,35 @@ app.put("/leaves/:id", async (req, res) => {
 
 });
 
+// UPDATE LEAVE STATUS
+app.put("/leave-status/:id", async (req, res) => {
+
+  try {
+
+    const updatedLeave =
+      await Leave.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: req.body.status,
+        },
+        { new: true }
+      );
+
+    res.json(updatedLeave);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message:
+        "Failed to update leave",
+    });
+
+  }
+
+});
+
 // SERVER
 app.post("/apply-leave", async (req, res) => {
 

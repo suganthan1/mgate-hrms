@@ -1,3 +1,6 @@
+import axios from "axios";
+import { useEffect } from "react";
+
 const Leave = ({
 
   leaveRequests,
@@ -6,7 +9,15 @@ const Leave = ({
 
   setShowLeaveModal,
 
+  fetchLeaves,
+
 }) => {
+
+  useEffect(() => {
+
+    fetchLeaves();
+
+  }, []);
 
   return (
 
@@ -16,7 +27,7 @@ const Leave = ({
         Leave Management
       </h1>
 
-      {userRole === "Employee" && (
+      {["Employee", "HR", "Admin", "Manager"].includes(userRole) && (
 
         <button
           onClick={() =>
@@ -57,6 +68,10 @@ const Leave = ({
               Status
             </th>
 
+            <th className="text-left py-4">
+              Action
+            </th>
+
           </tr>
 
         </thead>
@@ -80,11 +95,76 @@ const Leave = ({
 
               <td className="py-5">
 
-                <span className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full text-sm">
+              <span
+  className={`px-4 py-2 rounded-full text-sm font-semibold ${
+    leave.status === "Approved"
+      ? "bg-green-100 text-green-700"
+      : leave.status === "Rejected"
+      ? "bg-red-100 text-red-700"
+      : "bg-yellow-100 text-yellow-700"
+  }`}
+>
+  {leave.status}
+</span>
 
-                  {leave.status}
+              </td>
 
-                </span>
+              <td className="py-5">
+
+                <div className="flex gap-3">
+
+                 
+
+<button
+  disabled={leave.status === "Approved" ||
+leave.status === "Rejected"}
+  onClick={async () => {
+
+    await axios.put(
+      `http://localhost:5000/leave-status/${leave._id}`,
+      {
+        status: "Approved",
+      }
+    );
+
+    fetchLeaves();
+
+  }}
+  className={`text-white px-4 py-2 rounded-xl ${
+    leave.status === "Approved" ||
+leave.status === "Rejected"
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-green-600 hover:bg-green-700"
+  }`}
+>
+  Approve
+</button>
+
+<button
+  disabled={leave.status === "Approved" ||
+leave.status === "Rejected"}
+  onClick={async () => {
+
+    await axios.put(
+      `http://localhost:5000/leave-status/${leave._id}`,
+      {
+        status: "Rejected",
+      }
+    );
+
+    fetchLeaves();
+
+  }}
+  className={`text-white px-4 py-2 rounded-xl ${
+    leave.status === "Approved" ||
+leave.status === "Rejected"
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-red-600 hover:bg-red-700"
+  }`}
+>
+  Reject
+</button>
+                </div>
 
               </td>
 

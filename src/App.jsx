@@ -1490,20 +1490,20 @@ hasAccess([
 {activePage === "leave" && (
 
   <Leave
-
-    leaveRequests={
-      leaveRequests
-    }
-
+    leaveRequests={leaveRequests}
     userRole={userRole}
-
-    setShowLeaveModal={
-      setShowLeaveModal
-    }
-
+    setShowLeaveModal={setShowLeaveModal}
+    fetchLeaves={fetchLeaves}
   />
 
 )}
+
+   
+  
+
+  
+
+
 {/* HOLIDAYS PAGE */}
 {activePage === "holidays" && (
 
