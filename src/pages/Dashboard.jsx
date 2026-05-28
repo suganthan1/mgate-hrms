@@ -5,191 +5,205 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { Users, Wallet, TrendingUp, Clock } from "lucide-react";
 
-    const Dashboard = ({
-
+const Dashboard = ({
   employees = [],
-
   leaves = [],
-
 }) => {
 
   const chartData = [
     {
       name: "Present",
-      value: employees.filter(
-        (employee) =>
-          employee.status ===
-          "Present"
-      ).length,
+      value: employees.filter((e) => e.status === "Present").length,
     },
     {
       name: "Leave",
-      value: employees.filter(
-        (employee) =>
-          employee.status ===
-          "Leave"
-      ).length,
+      value: employees.filter((e) => e.status === "Leave").length,
+    },
+  ];
+
+  const statCards = [
+    {
+      label: "Total Employees",
+      value: employees.length,
+      sub: "This Month",
+      icon: <Users size={26} color="#2563eb" />,
+      iconBg: "#eff6ff",
+      valueColor: "#0f172a",
+    },
+    {
+      label: "Present Employees",
+      value: employees.filter((e) => e.status === "Present").length,
+      sub: "This Month",
+      icon: <Wallet size={26} color="#16a34a" />,
+      iconBg: "#f0fdf4",
+      valueColor: "#16a34a",
+    },
+    {
+      label: "Employees On Leave",
+      value: employees.filter((e) => e.status === "Leave").length,
+      sub: "This Month",
+      icon: <TrendingUp size={26} color="#f97316" />,
+      iconBg: "#fff7ed",
+      valueColor: "#0f172a",
+    },
+    {
+      label: "Pending Leaves",
+      value: leaves.filter((l) => l.status === "Pending").length,
+      sub: "This Month",
+      icon: <Clock size={26} color="#ef4444" />,
+      iconBg: "#fef2f2",
+      valueColor: "#ef4444",
     },
   ];
 
   return (
+    <div style={{ fontFamily: "'Inter', sans-serif" }}>
 
-    <>
+      {/* STAT CARDS */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 20,
+          marginBottom: 28,
+        }}
+      >
+        {statCards.map((card, i) => (
+          <div
+            key={i}
+            style={{
+              background: "#ffffff",
+              borderRadius: 16,
+              border: "1px solid #f1f5f9",
+              padding: "24px 28px",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 18,
+            }}
+          >
+            {/* ICON */}
+            <div
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                background: card.iconBg,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              {card.icon}
+            </div>
 
-      {/* ANALYTICS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
-
-        {/* TOTAL EMPLOYEES */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
-
-          <h2 className="text-xl text-gray-500 mb-8">
-            Total Employees
-          </h2>
-
-          <p className="text-5xl font-bold text-blue-600 mt-auto">
-            {employees.length}
-          </p>
-
-        </div>
-
-        {/* PRESENT */}
-       <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
-
-          <h2 className="text-xl text-gray-500 mb-8">
-            Present Employees
-          </h2>
-
-          <p className="text-5xl font-bold text-green-600">
-
-            {
-              employees.filter(
-                (employee) =>
-                  employee.status ===
-                  "Present"
-              ).length
-            }
-
-          </p>
-
-        </div>
-
-        {/* ON LEAVE */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
-
-          <h2 className="text-xl text-gray-500 mb-8">
-            Employees On Leave
-          </h2>
-
-          <p className="text-5xl font-bold text-yellow-500">
-
-            {
-              employees.filter(
-                (employee) =>
-                  employee.status ===
-                  "Leave"
-              ).length
-            }
-
-          </p>
-
-        </div>
-
-        {/* PENDING */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
-
-          <h2 className="text-xl text-gray-500 mb-8">
-            Pending Leaves
-          </h2>
-
-          <p className="text-5xl font-bold text-red-500">
-
-            {
-              leaves.filter(
-                (leave) =>
-                  leave.status ===
-                  "Pending"
-              ).length
-            }
-
-          </p>
-
-        </div>
-
-        {/* TEAM */}
-       <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between min-h-[260px]">
-              <h2 className="text-xl text-gray-500 mb-8">
-            Team Members
-          </h2>
-
-          <p className="text-5xl font-bold text-blue-600 mt-auto">
-            {employees.length}
-          </p>
-
-        </div>
-
+            {/* TEXT */}
+            <div>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "#64748b",
+                  fontWeight: 500,
+                  marginBottom: 6,
+                }}
+              >
+                {card.label}
+              </p>
+              <p
+                style={{
+                  fontSize: 30,
+                  fontWeight: 700,
+                  color: card.valueColor,
+                  lineHeight: 1,
+                  marginBottom: 6,
+                }}
+              >
+                {card.value}
+              </p>
+              <p style={{ fontSize: 12, color: "#94a3b8" }}>{card.sub}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
-            {/* WELCOME */}
-      <div className="bg-white rounded-2xl shadow-lg p-10 mb-8">
-
-        <h1 className="text-5xl font-bold mb-6">
+      {/* WELCOME BANNER */}
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: 16,
+          border: "1px solid #f1f5f9",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+          padding: "32px 36px",
+          marginBottom: 24,
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 28,
+            fontWeight: 700,
+            color: "#0f172a",
+            marginBottom: 10,
+          }}
+        >
           Welcome to MGate HRMS
         </h1>
-
-        <p className="text-lg text-gray-500 leading-relaxed">
-
-          Manage employees, attendance,
-          leave requests, payroll and
-          company operations from one
-          centralized dashboard.
-
+        <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7 }}>
+          Manage employees, attendance, leave requests, payroll and company
+          operations from one centralized dashboard.
         </p>
-
       </div>
 
       {/* EMPLOYEE ANALYTICS */}
-      <div className="bg-white rounded-3xl shadow-xl p-8">
-
-        <h2 className="text-3xl font-bold mb-8">
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: 16,
+          border: "1px solid #f1f5f9",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+          padding: "28px 36px",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            color: "#0f172a",
+            marginBottom: 24,
+          }}
+        >
           Employee Analytics
         </h2>
 
-        <div className="h-80">
-
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-          >
-
+        <div style={{ height: 300 }}>
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-
               <Pie
                 data={chartData}
                 dataKey="value"
+                nameKey="name"
                 outerRadius={120}
-                label
+                label={({ name, value }) => `${name}: ${value}`}
               >
-
                 <Cell fill="#22c55e" />
                 <Cell fill="#facc15" />
-
               </Pie>
-
-              <Tooltip />
-
+              <Tooltip
+                contentStyle={{
+                  borderRadius: 10,
+                  border: "1px solid #e2e8f0",
+                  fontSize: 13,
+                }}
+              />
             </PieChart>
-
           </ResponsiveContainer>
-
         </div>
-
       </div>
 
-    </>
-
+    </div>
   );
-
 };
 
 export default Dashboard;

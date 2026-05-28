@@ -110,6 +110,35 @@ const attendanceSchema =
     },
 
   });
+  const payrollSchema =
+  new mongoose.Schema({
+
+    employee: String,
+
+    department: String,
+
+    salary: Number,
+
+    bonus: Number,
+
+    deduction: Number,
+
+    netSalary: Number,
+
+    month: String,
+
+    status: {
+      type: String,
+      default: "Pending",
+    },
+
+  });
+
+const Payroll =
+  mongoose.model(
+    "Payroll",
+    payrollSchema
+  );
 
 // Models
 const Employee =
@@ -489,6 +518,113 @@ app.put(
 
     }
 
+  }
+);
+// CREATE PAYROLL
+app.post(
+  "/payroll",
+  async (req, res) => {
+
+    try {
+
+      const payroll =
+        new Payroll(
+          req.body
+        );
+
+      await payroll.save();
+
+      res.json({
+        message:
+          "Payroll Created",
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+
+    }
+  }
+);
+
+// GET PAYROLL
+app.get(
+  "/payroll",
+  async (req, res) => {
+
+    try {
+
+      const payroll =
+        await Payroll.find();
+
+      res.json(payroll);
+
+    } catch (error) {
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+
+    }
+  }
+);
+
+// UPDATE PAYROLL STATUS
+app.put(
+  "/payroll/:id",
+  async (req, res) => {
+
+    try {
+
+      await Payroll.findByIdAndUpdate(
+        req.params.id,
+        req.body
+      );
+
+      res.json({
+        message:
+          "Payroll Updated",
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+
+    }
+  }
+);
+
+// DELETE PAYROLL
+app.delete(
+  "/payroll/:id",
+  async (req, res) => {
+
+    try {
+
+      await Payroll.findByIdAndDelete(
+        req.params.id
+      );
+
+      res.json({
+        message:
+          "Payroll Deleted",
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+
+    }
   }
 );
 const JWT_SECRET =
