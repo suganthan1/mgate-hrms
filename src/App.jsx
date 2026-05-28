@@ -8,10 +8,11 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import Attendance from "./components/Attendance";
-import Payroll from "./components/Payroll";
+import Payroll from "./pages/Payroll";
 import Leave from "./pages/Leave";
 import EmployeeModal from "./components/EmployeeModal";
 import logo from "./assets/logo.png";
+import MainLayout from "./layouts/MainLayout";
 
 import {
   fetchEmployeesAPI,
@@ -300,119 +301,83 @@ export default function HRMSApp() {
       />
 
       {/* ── MAIN CONTENT ── */}
-      <div style={{
-        marginLeft: 220,
-        flex: 1,
-        minHeight: "100vh",
-        overflowY: "auto",
-        backgroundColor: "#f1f5f9",
-      }}>
+      <MainLayout
+  activePage={activePage}
+  setActivePage={setActivePage}
+  darkMode={darkMode}
+  setDarkMode={setDarkMode}
+  onLogout={() => {
+    localStorage.clear();
+    setIsLoggedIn(false);
+  }}
+>
+  {activePage === "dashboard" && (
+  <>
+    <div style={{ marginBottom: 28 }}>
+      <h1
+        style={{
+          fontSize: 28,
+          fontWeight: 700,
+          color: "#2563eb",
+          margin: 0,
+        }}
+      >
+        MGate HRMS
+      </h1>
 
-        {/* NOTIFICATION */}
-        {notification && (
-          <div style={{
-            position: "fixed", top: 20, right: 24, zIndex: 9999,
-            padding: "12px 20px", borderRadius: 10,
-            background: notificationType === "success" ? "#16a34a" : notificationType === "error" ? "#ef4444" : "#f59e0b",
-            color: "#fff", fontSize: 14, fontWeight: 500,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-          }}>{notification}</div>
-        )}
+      <p
+        style={{
+          color: "#64748b",
+          fontSize: 15,
+          marginTop: 6,
+        }}
+      >
+        Admin Portal
+      </p>
+    </div>
 
-        {/* PAGE CONTENT */}
-        <div style={{ padding: "28px 32px", maxWidth: 1400, margin: "0 auto" }}>
+    <Dashboard
+      employees={employees}
+      leaveRequests={leaveRequests}
+      attendanceRecords={attendanceRecords}
+    />
+  </>
+)}
 
-          {/* DASHBOARD */}
-          {activePage === "dashboard" && (
-            <>
-              <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontSize: 28, fontWeight: 800, color: "#2563eb", margin: 0 }}>MGate HRMS</h1>
-                <p style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>Admin Portal</p>
-              </div>
-              <Dashboard employees={employees} leaves={leaveRequests} />
-            </>
-          )}
+{activePage === "employees" && (
+  <Employees
+    employees={filteredEmployees}
+    searchTerm={searchTerm}
+    setSearchTerm={setSearchTerm}
+    sortOrder={sortOrder}
+    setSortOrder={setSortOrder}
+    statusFilter={statusFilter}
+    setStatusFilter={setStatusFilter}
+    setShowModal={setShowModal}
+    editEmployee={editEmployee}
+    deleteEmployee={deleteEmployee}
+    exportToExcel={exportToExcel}
+    setSelectedEmployee={setSelectedEmployee}
+  />
+)}
 
-          {/* EMPLOYEES */}
-          {activePage === "employees" && hasAccess(["Super Admin","Admin","HR"]) && (
-            <Employees
-              employees={employees}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              filteredEmployees={filteredEmployees}
-              setSelectedEmployee={setSelectedEmployee}
-              editEmployee={editEmployee}
-              deleteEmployee={deleteEmployee}
-              onAddEmployee={() => { resetForm(); setEditingEmployee(null); setShowModal(true); }}
-              onExportExcel={exportToExcel}
-            />
-          )}
+{activePage === "attendance" && (
+  <Attendance
+    attendanceRecords={attendanceRecords}
+    employees={employees}
+  />
+)}
 
-          {/* ATTENDANCE */}
-          {activePage === "attendance" && <Attendance />}
+{activePage === "payroll" && (
+  <Payroll employees={employees} />
+)}
 
-          {/* LEAVE */}
-          {activePage === "leave" && (
-            <Leave
-              leaveRequests={leaveRequests}
-              userRole={userRole}
-              setShowLeaveModal={setShowLeaveModal}
-              fetchLeaves={fetchLeaves}
-            />
-          )}
-
-          {/* PAYROLL */}
-          {activePage === "payroll" && <Payroll />}
-
-          {/* DEPARTMENTS */}
-          {activePage === "departments" && hasAccess(["Super Admin","Admin","HR"]) && (
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-                <div>
-                  <h1 style={{ fontSize: 26, fontWeight: 700, color: "#0f172a", margin: 0 }}>Departments</h1>
-                  <p style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>Total Employees: {employees.length}</p>
-                </div>
-                <div style={{ display: "flex", gap: 12 }}>
-                  <input type="text" placeholder="Department Name" value={departmentName}
-                    onChange={(e) => setDepartmentName(e.target.value)}
-                    style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 16px", fontSize: 14, outline: "none" }} />
-                  <button onClick={addDepartment} style={{
-                    background: "#2563eb", color: "#fff", border: "none",
-                    borderRadius: 10, padding: "10px 20px", fontSize: 14, fontWeight: 600, cursor: "pointer",
-                  }}>Add Department</button>
-                </div>
-              </div>
-              <div style={{ background: "#fff", borderRadius: 14, padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.07)" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr style={{ borderBottom: "2px solid #e2e8f0" }}>
-                      {["Department","Employees","Status","Action"].map(h => (
-                        <th key={h} style={{ textAlign: "left", paddingBottom: 12, fontSize: 13, fontWeight: 600, color: "#475569" }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {departments.map((dept, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                        <td style={{ padding: "14px 0", fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{dept}</td>
-                        <td style={{ padding: "14px 0", fontSize: 14, color: "#334155" }}>{employees.filter(e => e.department === dept).length}</td>
-                        <td style={{ padding: "14px 0" }}>
-                          <span style={{ padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, background: "#dcfce7", color: "#16a34a" }}>Active</span>
-                        </td>
-                        <td style={{ padding: "14px 0" }}>
-                          <button onClick={() => deleteDepartment(i)} style={{ background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Delete</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+{activePage === "leave" && (
+  <Leave
+    leaveRequests={leaveRequests}
+    setShowLeaveModal={setShowLeaveModal}
+  />
+)}
 
           {/* HOLIDAYS */}
           {activePage === "holidays" && (
@@ -466,8 +431,8 @@ export default function HRMSApp() {
             <div style={{ textAlign: "center", padding: "80px 0", color: "#94a3b8", fontSize: 16 }}>Settings coming soon...</div>
           )}
 
-        </div>
-      </div>
+        </MainLayout>
+      
 
       {/* EMPLOYEE MODAL */}
       {showModal && (
@@ -555,7 +520,6 @@ export default function HRMSApp() {
           </div>
         </div>
       )}
-
-    </div>
+</div>
   );
 }

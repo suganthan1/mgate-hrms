@@ -33,7 +33,14 @@ const Employees = ({
   );
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif" }}>
+   <div
+  style={{
+    fontFamily: "'Inter', sans-serif",
+    width: "100%",
+    maxWidth: 1320,
+    margin: "0 auto",
+  }}
+>
 
       {/* PAGE HEADER */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28 }}>
@@ -77,74 +84,107 @@ const Employees = ({
       </div>
 
       {/* SEARCH + SORT + FILTER ROW */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginBottom: 20 }}>
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 14,
+    marginBottom: 28,
+    flexWrap: "wrap",
+  }}
+>
 
         {/* SEARCH */}
         <div style={{ position: "relative" }}>
           <Search
             size={16}
             color="#94a3b8"
-            style={{ position: "absolute", top: "50%", left: 14, transform: "translateY(-50%)" }}
+            style={{ position: "absolute", top: "50%", left: 16, transform: "translateY(-50%)" }}
           />
           <input
             type="text"
             placeholder="Search employee..."
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-            style={{
-              border: "1px solid #e2e8f0", borderRadius: 10,
-              padding: "10px 16px 10px 40px",
-              fontSize: 14, color: "#0f172a",
-              width: 260, outline: "none",
-              background: "#fff",
-            }}
+           style={{
+  border: "1px solid #dbe4ee",
+  borderRadius: 12,
+  padding: "0 18px 0 46px",
+  fontSize: 14,
+  fontWeight: 500,
+  color: "#0f172a",
+  width: 360,
+  height: 52,
+  outline: "none",
+  background: "#ffffff",
+  boxSizing: "border-box",
+}}
           />
         </div>
 
-        {/* SORT BUTTON */}
-        <button
-          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            border: "1px solid #e2e8f0", borderRadius: 10,
-            padding: "10px 16px", fontSize: 14, fontWeight: 500,
-            background: "#fff", color: "#0f172a", cursor: "pointer",
-          }}
-        >
-          Sort {sortOrder === "asc" ? "Z-A" : "A-Z"}
-          <ChevronsUpDown size={14} color="#64748b" />
-        </button>
+      {/* SORT BUTTON */}
+<button
+  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    border: "1px solid #dbe4ee",
+    borderRadius: 12,
+    padding: "0 18px",
+    minWidth: 140,
+    height: 52,
+    justifyContent: "space-between",
+    fontSize: 14,
+    fontWeight: 600,
+    background: "#fff",
+    color: "#0f172a",
+    cursor: "pointer",
+  }}
+>
+  Sort {sortOrder === "asc" ? "Z-A" : "A-Z"}
+  <ChevronsUpDown size={14} color="#64748b" />
+</button>
 
         {/* STATUS FILTER */}
-        <select
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-          style={{
-            border: "1px solid #e2e8f0", borderRadius: 10,
-            padding: "10px 36px 10px 14px",
-            fontSize: 14, color: "#0f172a",
-            background: "#fff", cursor: "pointer",
-            outline: "none", appearance: "none",
-          }}
-        >
-          <option value="All">All</option>
-          <option value="Present">Present</option>
-          <option value="Leave">Leave</option>
-        </select>
-
-      </div>
-
-      {/* TABLE CARD */}
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: 16,
-          border: "1px solid #f1f5f9",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-          overflow: "hidden",
-          padding: "0 28px 24px",
-        }}
-      >
+<select
+  value={statusFilter}
+  onChange={(e) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1);
+  }}
+  style={{
+    border: "1px solid #dbe4ee",
+    borderRadius: 12,
+    padding: "0 18px",
+    width: 140,
+    height: 52,
+    fontSize: 14,
+    fontWeight: 600,
+    color: "#0f172a",
+    background: "#fff",
+    cursor: "pointer",
+    outline: "none",
+    appearance: "none",
+  }}
+>
+  <option value="All">All</option>
+  <option value="Present">Present</option>
+  <option value="Leave">Leave</option>
+</select>
+</div>
+     {/* TABLE CARD */}
+<div
+  style={{
+    background: "#ffffff",
+    borderRadius: 20,
+    border: "1px solid #f1f5f9",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+    overflow: "hidden",
+    padding: "0 32px 28px",
+    width: "100%",
+  }}
+>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
@@ -326,6 +366,7 @@ const Employees = ({
 
       </div>
     </div>
+    
   );
 };
 
