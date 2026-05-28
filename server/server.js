@@ -43,6 +43,8 @@ mongoose.connect(
   console.log(err);
 });
 
+  
+
 // Employee Schema
 const employeeSchema =
   new mongoose.Schema({
@@ -57,13 +59,16 @@ const employeeSchema =
     salary: String,
     reportingManager: String,
     status: String,
+
     leaveBalance: {
-  type: Number,
-  default: 20,
-},
+      type: Number,
+      default: 20,
+    },
 
   });
-  const leaveSchema =
+
+// Leave Schema
+const leaveSchema =
   new mongoose.Schema({
 
     employee: String,
@@ -78,18 +83,15 @@ const employeeSchema =
 
     status: String,
 
-approvalStage: {
-  type: String,
-  default: "Manager",
-},
+    approvalStage: {
+      type: String,
+      default: "Manager",
+    },
+
   });
 
-const Leave =
-  mongoose.model(
-    "Leave",
-    leaveSchema
-  );
-  const attendanceSchema =
+// Attendance Schema
+const attendanceSchema =
   new mongoose.Schema({
 
     employee: String,
@@ -109,18 +111,25 @@ const Leave =
 
   });
 
+// Models
+const Employee =
+  mongoose.model(
+    "Employee",
+    employeeSchema
+  );
+
+const Leave =
+  mongoose.model(
+    "Leave",
+    leaveSchema
+  );
+
 const Attendance =
   mongoose.model(
     "Attendance",
     attendanceSchema
   );
-
-// Employee Model
-const Employee = mongoose.model(
-  "Employee",
-  employeeSchema
-);
-// LOGIN API
+  // LOGIN API
 app.post(
   "/login",
   async (req, res) => {
