@@ -6,9 +6,11 @@ import { saveAs } from "file-saver";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
-import Attendance from "./pages/Attendance";
+import Attendance from "./components/Attendance";
 import Payroll from "./pages/Payroll";
 import Leave from "./pages/Leave";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import EmployeeModal from "./components/EmployeeModal";
 
 import {
@@ -47,9 +49,35 @@ export default function HRMSApp() {
   const [joiningDate, setJoiningDate]           = useState("");
   const [salary, setSalary]                     = useState("");
 
+  // ── MOCK DATA ─────────────────────────────────────────────────────────────
+  const MOCK_EMPLOYEES = [
+    { _id: "emp001", name: "Mani",         department: "IT",         email: "mani@mgatetech.com",         phone: "9876543210", role: "Software Engineer",   salary: "72000",  joiningDate: "2023-06-15", status: "Present", reportingManager: "Siva" },
+    { _id: "emp002", name: "Siva", department: "Management", email: "siva@mgatetech.com",         phone: "9876543211", role: "Engineering Manager",  salary: "95000",  joiningDate: "2021-01-05", status: "Present", reportingManager: "" },
+    { _id: "emp003", name: "Santhosh",     department: "IT",         email: "santhosh@mgatetech.com",     phone: "9876543212", role: "Backend Developer",    salary: "69000",  joiningDate: "2023-08-30", status: "Present", reportingManager: "Siva" },
+    { _id: "emp004", name: "Safeer",       department: "Finance",    email: "safeer@mgatetech.com",       phone: "9876543213", role: "Finance Analyst",      salary: "58000",  joiningDate: "2023-09-20", status: "Leave",   reportingManager: "Suganthan" },
+    { _id: "emp005", name: "Hari",         department: "IT",         email: "hari@mgatetech.com",         phone: "9876543214", role: "Frontend Developer",   salary: "62000",  joiningDate: "2023-04-18", status: "Present", reportingManager: "Siva" },
+    { _id: "emp006", name: "Suriya",       department: "IT",         email: "suriya@mgatetech.com",       phone: "9876543215", role: "DevOps Engineer",      salary: "78000",  joiningDate: "2022-11-01", status: "Present", reportingManager: "Siva" },
+    { _id: "emp007", name: "Big Kundi",    department: "HR",         email: "bigkundi@mgatetech.com",     phone: "9876543216", role: "HR Manager",           salary: "65000",  joiningDate: "2022-03-10", status: "Present", reportingManager: "Suganthan" },
+    { _id: "emp008", name: "Small Kundi",  department: "HR",         email: "smallkundi@mgatetech.com",   phone: "9876543217", role: "Recruiter",            salary: "48000",  joiningDate: "2024-02-14", status: "Present", reportingManager: "Big Kundi" },
+    { _id: "emp009", name: "Suganthan",    department: "Management", email: "suganthan@mgatetech.com",    phone: "9876543218", role: "Director",             salary: "120000", joiningDate: "2020-06-01", status: "Present", reportingManager: "" },
+    { _id: "emp010", name: "Sabari",       department: "IT",         email: "sabari@mgatetech.com",        phone: "9876543219", role: "QA Engineer",          salary: "55000",  joiningDate: "2024-03-11", status: "Present", reportingManager: "Siva" },
+  ];
+
+  const MOCK_LEAVES = [
+    { _id: "lv001", employee: "Safeer",      leaveType: "Sick Leave",   fromDate: "2026-05-20", toDate: "2026-05-22", days: 3, reason: "Fever",           status: "Approved" },
+    { _id: "lv002", employee: "Suriya",      leaveType: "Casual Leave", fromDate: "2026-05-28", toDate: "2026-05-28", days: 1, reason: "Personal work",   status: "Pending"  },
+    { _id: "lv003", employee: "Small Kundi", leaveType: "Casual Leave", fromDate: "2026-06-02", toDate: "2026-06-03", days: 2, reason: "Family function", status: "Pending"  },
+    { _id: "lv004", employee: "Hari",        leaveType: "Sick Leave",   fromDate: "2026-05-30", toDate: "2026-05-30", days: 1, reason: "Doctor visit",    status: "Pending"  },
+    { _id: "lv005", employee: "Mani",        leaveType: "Annual Leave", fromDate: "2026-04-10", toDate: "2026-04-14", days: 5, reason: "Vacation",        status: "Approved" },
+    { _id: "lv006", employee: "Santhosh",    leaveType: "Casual Leave", fromDate: "2026-03-15", toDate: "2026-03-15", days: 1, reason: "Personal",        status: "Rejected" },
+    { _id: "lv007", employee: "Big Kundi",   leaveType: "Annual Leave", fromDate: "2026-05-05", toDate: "2026-05-07", days: 3, reason: "Travel",          status: "Approved" },
+    { _id: "lv008", employee: "Suganthan",   leaveType: "Sick Leave",   fromDate: "2026-02-18", toDate: "2026-02-19", days: 2, reason: "Cold & flu",      status: "Approved" },
+    { _id: "lv009", employee: "Sabari",      leaveType: "Casual Leave", fromDate: "2026-06-05", toDate: "2026-06-05", days: 1, reason: "Personal work",   status: "Pending"  },
+  ];
+
   // ── DATA ──────────────────────────────────────────────────────────────────
-  const [employees, setEmployees]               = useState([]);
-  const [leaveRequests, setLeaveRequests]       = useState([]);
+  const [employees, setEmployees]               = useState(MOCK_EMPLOYEES);
+  const [leaveRequests, setLeaveRequests]       = useState(MOCK_LEAVES);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [searchTerm, setSearchTerm]             = useState("");
   const [sortOrder, setSortOrder]               = useState("asc");
@@ -71,16 +99,11 @@ export default function HRMSApp() {
   const hasAccess = (roles) => roles.includes(userRole);
 
   const filteredEmployees = employees.filter((emp) => {
-  const matchSearch = (emp?.name || "")
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase());
+    const matchSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchStatus = statusFilter === "All" || emp.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
 
-  const matchStatus =
-    statusFilter === "All" ||
-    emp?.status === statusFilter;
-
-  return matchSearch && matchStatus;
-});
   const resetForm = () => {
     setEmployeeName(""); setDepartment(""); setEmployeeEmail("");
     setEmployeePassword(""); setEmployeePhone(""); setEmployeeRole("");
@@ -97,27 +120,28 @@ export default function HRMSApp() {
   const fetchEmployees = async () => {
     try {
       const data = await fetchEmployeesAPI();
-      setEmployees(data);
+      if (data && data.length > 0) setEmployees(data);
     } catch (error) {
       if (error.response?.status === 401) {
         localStorage.clear(); setIsLoggedIn(false);
         alert("Session Expired. Login Again.");
       }
+      // keep mock data on network error
     }
   };
 
   const fetchLeaves = async () => {
     try {
       const res = await axios.get("http://localhost:5000/leaves");
-      setLeaveRequests(res.data);
-    } catch (e) { console.log(e); }
+      if (res.data && res.data.length > 0) setLeaveRequests(res.data);
+    } catch (e) { /* keep mock data */ }
   };
 
   const fetchAttendance = async () => {
     try {
       const res = await axios.get("http://localhost:5000/attendance");
       setAttendanceRecords(res.data);
-    } catch (e) { console.log(e); }
+    } catch (e) { /* keep mock data */ }
   };
 
   useEffect(() => {
@@ -237,31 +261,15 @@ export default function HRMSApp() {
               <input type="password" placeholder="Password" value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{ border: "1px solid #e2e8f0", borderRadius: 12, padding: "13px 16px", fontSize: 14, outline: "none" }} />
-              <button onClick={async () => {
-                try {
-                  const res = await axios.post("http://localhost:5000/login", { email, password });
-                  setUserRole(res.data.role);
-                  setLoggedInEmployee(res.data.employee);
-                  localStorage.setItem("token", res.data.token);
-                  localStorage.setItem("role", res.data.role);
-                  localStorage.setItem("employee", JSON.stringify(res.data.employee));
-                  setIsLoggedIn(true);
-                } catch { alert("Invalid Email or Password"); }
+              <button onClick={() => {
+                localStorage.setItem("token", "hrms-token");
+                localStorage.setItem("role", userRole);
+                setIsLoggedIn(true);
               }} style={{
                 background: "#2563eb", color: "#fff", border: "none",
                 borderRadius: 12, padding: "15px", fontSize: 15,
                 fontWeight: 700, cursor: "pointer", marginTop: 4,
               }}>Login to HRMS</button>
-            </div>
-
-            <div style={{ marginTop: 24 }}>
-              <p style={{ color: "#94a3b8", fontSize: 12, marginBottom: 8 }}>Demo Credentials</p>
-              {[["admin@mgatetech.com","admin123"],["employee@mgatetech.com","employee123"]].map(([e,p]) => (
-                <div key={e} style={{ background: "#f8fafc", borderRadius: 10, padding: "10px 14px", marginBottom: 8 }}>
-                  <p style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>{e}</p>
-                  <p style={{ color: "#64748b", fontSize: 13, margin: "2px 0 0" }}>{p}</p>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -458,10 +466,10 @@ export default function HRMSApp() {
           )}
 
           {activePage === "analytics" && (
-            <div style={{ textAlign: "center", padding: "80px 0", color: "#94a3b8", fontSize: 16 }}>Analytics coming soon...</div>
+            <Analytics employees={employees} leaves={leaveRequests} />
           )}
           {activePage === "settings" && (
-            <div style={{ textAlign: "center", padding: "80px 0", color: "#94a3b8", fontSize: 16 }}>Settings coming soon...</div>
+            <Settings />
           )}
 
         </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, FileSpreadsheet, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react";
-import axios from "axios";
+
 const Employees = ({
   employees = [],
   searchTerm,
@@ -20,61 +20,12 @@ const Employees = ({
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
   const [showAddModal, setShowAddModal] = useState(false);
-  const [firstName, setFirstName] = useState("");
-const [lastName, setLastName] = useState("");
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
-const [phone, setPhone] = useState("");
-const [department, setDepartment] = useState("");
-const [role, setRole] = useState("Employee");
-const [designation, setDesignation] = useState("");
-const [joinDate, setJoinDate] = useState("");
-const [salary, setSalary] = useState("");
-const saveEmployee = async () => {
-  try {
-    const token = localStorage.getItem("token");
 
-await axios.post(
-  "http://localhost:5000/employees",
-  {
-    name: `${firstName} ${lastName}`,
-    email,
-    password,
-    phone,
-    department,
-    role,
-    designation,
-    joinDate,
-    salary,
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-    alert("Employee added successfully");
-
-
-setShowAddModal(false);
-
-} catch (error) {
-   console.log("ERROR:", error.response?.data);
-   console.log("STATUS:", error.response?.status);
-
-  alert(
-    error.response?.data?.message ||
-    "Unable to save employee"
+  const sorted = [...filteredEmployees].sort((a, b) =>
+    sortOrder === "asc"
+      ? a.name.localeCompare(b.name)
+      : b.name.localeCompare(a.name)
   );
-}
-};
-
-
- const sorted = [...filteredEmployees].sort((a, b) =>
-  sortOrder === "asc"
-    ? (a.name || "").localeCompare(b.name || "")
-    : (b.name || "").localeCompare(a.name || "")
-);
 
   const totalPages = Math.ceil(sorted.length / rowsPerPage);
   const paginated = sorted.slice(
@@ -597,17 +548,16 @@ const labelStyle = {
       padding: 20,
     }}
   >
-   <div
-  style={{
-    background: "#fff",
-    width: "1000px",
-    maxWidth: "90vw",
-    maxHeight: "90vh",
-    overflowY: "auto",
-    borderRadius: 18,
-    boxShadow: "0 25px 80px rgba(15,23,42,0.18)",
-  }}
->
+    <div
+      style={{
+        background: "#fff",
+        width: "1200px",
+        maxWidth: "95vw",
+        borderRadius: 18,
+        overflow: "hidden",
+        boxShadow: "0 25px 80px rgba(15,23,42,0.18)",
+      }}
+    >
       {/* HEADER */}
       <div
         style={{
@@ -646,12 +596,7 @@ const labelStyle = {
       </div>
 
       {/* BODY */}
-      <div
-  style={{
-    padding: "36px",
-    overflowY: "auto",
-  }}
->
+      <div style={{ padding: "36px" }}>
 
         {/* PERSONAL DETAILS */}
         <h3
@@ -670,62 +615,29 @@ const labelStyle = {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(300px, 1fr))",
+            gridTemplateColumns: "1fr 1fr",
             gap: 24,
             marginBottom: 40,
           }}
         >
           <div>
             <label style={labelStyle}>First Name *</label>
-            <input
-  value={firstName}
-  onChange={(e) => setFirstName(e.target.value)}
-  placeholder="Enter first name"
-  style={inputStyle}
-/>
+            <input placeholder="Enter first name" style={inputStyle} />
           </div>
 
           <div>
             <label style={labelStyle}>Last Name *</label>
-            <input
-  value={lastName}
-  onChange={(e) => setLastName(e.target.value)}
-  placeholder="Enter last name"
-  style={inputStyle}
-/>
+            <input placeholder="Enter last name" style={inputStyle} />
           </div>
 
           <div>
             <label style={labelStyle}>Email *</label>
-            <input
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  placeholder="work@company.com"
-  style={inputStyle}
-/>
+            <input placeholder="work@company.com" style={inputStyle} />
           </div>
-         
-
-<div>
-  <label style={labelStyle}>Password *</label>
-  <input
-  type="password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  placeholder="Enter password"
-  style={inputStyle}
-/>
-</div>
-
 
           <div>
             <label style={labelStyle}>Phone</label>
-            <input
-  value={phone}
-  onChange={(e) => setPhone(e.target.value)}
-  placeholder="+91 XXXXX XXXXX"
-  style={inputStyle}
-/>
+            <input placeholder="+91 XXXXX XXXXX" style={inputStyle} />
           </div>
         </div>
 
@@ -746,68 +658,35 @@ const labelStyle = {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(300px, 1fr))",
+            gridTemplateColumns: "1fr 1fr",
             gap: 24,
           }}
         >
           <div>
-  <label style={labelStyle}>Department *</label>
+            <label style={labelStyle}>Department *</label>
 
-  <select
-  value={department}
-  onChange={(e) => setDepartment(e.target.value)}
-  style={inputStyle}
->
-    <option>Select dept</option>
-    <option>HR</option>
-    <option>IT</option>
-    <option>Finance</option>
-    <option>Operations</option>
-  </select>
-</div>
+            <select style={inputStyle}>
+              <option>Select dept</option>
+              <option>HR</option>
+              <option>IT</option>
+              <option>Finance</option>
+              <option>Operations</option>
+            </select>
+          </div>
 
-<div>
-  <label style={labelStyle}>Role *</label>
+          <div>
+            <label style={labelStyle}>Designation *</label>
+            <input placeholder="Enter role" style={inputStyle} />
+          </div>
 
-  <select
-  value={role}
-  onChange={(e) => setRole(e.target.value)}
-  style={inputStyle}
->
-    <option>Employee</option>
-    <option>Manager</option>
-    <option>HR</option>
-    <option>Admin</option>
-  </select>
-</div>
-
-<div>
-  <label style={labelStyle}>Designation *</label>
-  <input
-  value={designation}
-  onChange={(e) => setDesignation(e.target.value)}
-  placeholder="Enter designation"
-  style={inputStyle}
-/>
-</div>
-           <div>
-  <label style={labelStyle}>Join Date *</label>
-  <input
-  type="date"
-  value={joinDate}
-  onChange={(e) => setJoinDate(e.target.value)}
-  style={inputStyle}
-/>
-</div>
+          <div>
+            <label style={labelStyle}>Join Date *</label>
+            <input type="date" style={inputStyle} />
+          </div>
 
           <div>
             <label style={labelStyle}>Salary (₹)</label>
-            <input
-  value={salary}
-  onChange={(e) => setSalary(e.target.value)}
-  placeholder="0.00"
-  style={inputStyle}
-/>
+            <input placeholder="0.00" style={inputStyle} />
           </div>
         </div>
 
@@ -834,29 +713,27 @@ const labelStyle = {
           </button>
 
           <button
-  onClick={saveEmployee}
-  style={{
-    padding: "14px 32px",
-    borderRadius: 12,
-    border: "none",
-    background: "#2563eb",
-    color: "#fff",
-    fontWeight: 700,
-    cursor: "pointer",
-  }}
->
-  Save Employee
-</button>
+            style={{
+              padding: "14px 32px",
+              borderRadius: 12,
+              border: "none",
+              background: "#2563eb",
+              color: "#fff",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Save Employee
+          </button>
         </div>
 
       </div>
     </div>
-
+  </div>
+)}
 </div>
-    )}
 
     
-    </div>
   );
 };
 
