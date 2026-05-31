@@ -4,14 +4,19 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 import Sidebar from "./components/Sidebar";
+
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
-import Attendance from "./components/Attendance";
+import Departments from "./pages/Departments";
 import Payroll from "./pages/Payroll";
 import Leave from "./pages/Leave";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+
+import Attendance from "./components/Attendance";
 import EmployeeModal from "./components/EmployeeModal";
+
+import { Building2 } from "lucide-react";
 
 import {
   fetchEmployeesAPI,
@@ -396,6 +401,8 @@ export default function HRMSApp() {
               </div>
             )
           )}
+          {/* Departments */}
+          {activePage === "departments" && <Departments />}
 
           {/* ATTENDANCE */}
           {activePage === "attendance" && <Attendance />}

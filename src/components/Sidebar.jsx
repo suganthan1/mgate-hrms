@@ -19,15 +19,16 @@ const Sidebar = ({
   onLogout,
 }) => {
 
-  const menuItems = [
-    { id: "dashboard",  label: "Dashboard",  Icon: LayoutDashboard },
-    { id: "employees",  label: "Employees",  Icon: Users           },
-    { id: "leave",      label: "Leaves",     Icon: CalendarX2      },
-    { id: "attendance", label: "Attendance", Icon: Clock           },
-    { id: "payroll",    label: "Payroll",    Icon: IndianRupee     },
-    { id: "analytics",  label: "Analytics",  Icon: BarChart2       },
-    { id: "settings",   label: "Settings",   Icon: Settings        },
-  ];
+ const menuItems = [
+  { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { id: "employees", label: "Employees", Icon: Users },
+  { id: "departments", label: "Departments", Icon: Building2 },
+  { id: "leave", label: "Leaves", Icon: CalendarX2 },
+  { id: "attendance", label: "Attendance", Icon: Clock },
+  { id: "payroll", label: "Payroll", Icon: IndianRupee },
+  { id: "analytics", label: "Analytics", Icon: BarChart2 },
+  { id: "settings", label: "Settings", Icon: Settings },
+];
 
   return (
     <div
